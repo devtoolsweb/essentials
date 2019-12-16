@@ -1,0 +1,33 @@
+{
+  "author": "<aperos.dev@gmail.com>",
+  "dependencies": {
+    "@aperos/event-emitter": "*",
+    "@aperos/ts-goodies": "*"
+  },
+  "description": "The most essential TypeScript classes for the Aperos framework",
+  "devDependencies": {
+    "@types/jest": "latest",
+    "dts-bundle": "latest",
+    "jest": "latest",
+    "make-dts-bundle": "latest",
+    "rollup": "latest",
+    "rollup-plugin-terser": "latest",
+    "rollup-plugin-typescript2": "latest",
+    "ts-jest": "latest",
+    "ts-node": "latest",
+    "typescript": "latest"
+  },
+  "license": "MIT",
+  "name": "@aperos/essentials",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rollup -c && npm run build-dts",
+    "build-dts": "make-dts-bundle",
+    "build-production": "BUILD=production npm run build",
+    "clean": "rm -rf build dist",
+    "prepare": "npm run clean && npm run build-production",
+    "test": "jest"
+  },
+  "types": "dist/index.d.ts",
+  "version": "0.0.1"
+}
