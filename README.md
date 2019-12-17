@@ -1,4 +1,4 @@
-# Aperos TypeScript goodies
+# Aperos essentials
 
 The most essential TypeScript classes for the Aperos framework.
 
