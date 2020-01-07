@@ -81,7 +81,7 @@ test('enum children', () => {
   expect(s).toBe(((2 * fc.value + n - 1) * n) / 2)
 })
 
-test('finalize', () => {
+test('dispose', () => {
   const parent = new TestClass()
   const a = makeTree(3, 5)
   const b = makeTree(3, 5)
@@ -91,9 +91,9 @@ test('finalize', () => {
     .addChild(b)
     .addChild(c)
   expect(parent.childCount).toBe(3)
-  b.finalize()
+  b.dispose()
   expect(parent.childCount).toBe(2)
-  a.finalize()
+  a.dispose()
   expect(parent.childCount).toBe(1)
 })
 
