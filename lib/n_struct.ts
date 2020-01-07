@@ -2,7 +2,7 @@
  * NStruct implements nested hierarchy of objects.
  */
 import { Constructor, IDisposable } from '@aperos/ts-goodies'
-import { BaseClass, IBaseClassOpts } from './base_class'
+import { BaseClass, IBaseClassOpts, IBaseClass } from './base_class'
 
 export interface INStructChild extends IDisposable {
   readonly chain: INStructChild[]
@@ -390,6 +390,6 @@ export function NStructContainerMixin<
   }
 }
 
-export class NStructChild extends NStructChildMixin<Constructor<BaseClass>>(
+export class NStructChild extends NStructChildMixin<Constructor<IBaseClass>>(
   BaseClass
 ) {}

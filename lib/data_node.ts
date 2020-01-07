@@ -9,7 +9,7 @@ import {
   TypedEvent
 } from '@aperos/event-emitter'
 import { Constructor } from './types'
-import { BaseClassFlags, IBaseClassOpts } from './base_class'
+import { BaseClassFlags, IBaseClassOpts, IBaseClass } from './base_class'
 import {
   INStructChild,
   INStructContainer,
@@ -37,6 +37,7 @@ export interface IDataNodeEvents extends IBaseEvents {
 
 export interface IDataNode
   extends ITypedEventEmitter<IDataNodeEvents>,
+    IBaseClass,
     INStructChild,
     INStructContainer {
   value: DataNodeValue
