@@ -4,7 +4,11 @@
  * of the NStructMixin can be overridden.
  */
 import { IBitFlags } from '@aperos/ts-goodies'
-import { INStructChild, INStructContainer } from './n_struct'
+import {
+  INStructChild,
+  INStructContainer,
+  INStructContainerConstructor
+} from './n_struct'
 import { BaseClassFlags } from './base_class'
 import { IBaseItemContainer, IItem } from './item'
 import { IConstructor } from './types'
@@ -60,21 +64,21 @@ const emptyItems = Object.freeze(new Set<IItem>())
 
 export function ItemContainerMixin<
   TBase extends IConstructor<INStructContainer>
-> (Base: TBase) {
+>(Base: TBase): TBase & INStructContainerConstructor<IItemContainer> {
   return class ItemContainer extends Base implements IItemContainer {
     readonly flags!: IBitFlags<ItemContainerFlags>
 
     /**
      * Possibility of multiple selection of items.
      */
-    get allowMultiselect (): boolean {
+    get allowMultiselect(): boolean {
       return this.flags.isSet('AllowMultiselect')
     }
 
     /**
      * Returns an iterable collection of child items.
      */
-    get items (): Set<IItem> | null {
+    get items(): Set<IItem> | null {
       return this.children as Set<IItem>
     }
 
@@ -82,29 +86,29 @@ export function ItemContainerMixin<
      * The collection of items may not coincide with the collection of children,
      * so we can't use property childCount here.
      */
-    get itemCount (): number {
+    get itemCount(): number {
       return this.items ? this.items.size : 0
     }
 
     /**
      * Possibility of cyclic selection of elements.
      */
-    get roundRobin (): boolean {
+    get roundRobin(): boolean {
       return this.flags.isSet('RoundRobin')
     }
 
-    get selectedCount () {
+    get selectedCount() {
       return this.selectedItems.size
     }
 
-    get selectedItems (): Set<IItem> {
+    get selectedItems(): Set<IItem> {
       return (this as any)[symSelectedItems] || emptyItems
     }
 
     /**
      * Returns index of the first selected item.
      */
-    get firstSelectedIndex (): number {
+    get firstSelectedIndex(): number {
       const si = this.selectedItems
       if (si.size > 0) {
         let index = 0
@@ -118,7 +122,7 @@ export function ItemContainerMixin<
       return -1
     }
 
-    get firstSelectedItem (): IItem | null {
+    get firstSelectedItem(): IItem | null {
       const si = this.selectedItems
       if (si.size > 0) {
         for (const item of this.items!) {
@@ -130,7 +134,7 @@ export function ItemContainerMixin<
       return null
     }
 
-    set allowMultiselect (value: boolean) {
+    set allowMultiselect(value: boolean) {
       if (this.allowMultiselect === value) {
         if (value) {
           this.flags.set('AllowMultiselect')
@@ -149,7 +153,7 @@ export function ItemContainerMixin<
       }
     }
 
-    set roundRobin (value: boolean) {
+    set roundRobin(value: boolean) {
       if (value) {
         this.flags.set('RoundRobin')
       } else {
@@ -161,7 +165,7 @@ export function ItemContainerMixin<
      * The collection of items may not coincide with the collection of children,
      * so we can't use method enumChildren() here.
      */
-    enumItems (visit: (item: IItem, index?: number) => boolean): this {
+    enumItems(visit: (item: IItem, index?: number) => boolean): this {
       if (this.itemCount > 0) {
         let i = 0
         for (const item of this.items!) {
@@ -173,7 +177,7 @@ export function ItemContainerMixin<
       return this
     }
 
-    enumSelectedItems (visit: (item: IItem) => boolean): this {
+    enumSelectedItems(visit: (item: IItem) => boolean): this {
       for (const item of this.selectedItems) {
         if (visit(item) === false) {
           break
@@ -186,7 +190,7 @@ export function ItemContainerMixin<
      * The collection of items may not coincide with the collection of children,
      * so we can't use method getChildAt() here.
      */
-    getItemAt (index: number): IItem | null {
+    getItemAt(index: number): IItem | null {
       const xs = this.items
       if (xs && index >= 0 && index < xs.size) {
         let i = 0
@@ -199,28 +203,26 @@ export function ItemContainerMixin<
       return null
     }
 
-    isItemSelected (item: IItem): boolean {
+    isItemSelected(item: IItem): boolean {
       return this.selectedItems.has(item)
     }
 
-    removeChild (child: INStructChild): this {
+    removeChild(child: INStructChild): this {
       this.unselectItem(child as IItem)
       return super.removeChild(child)
     }
 
-    selectAll (): this {
+    selectAll(): this {
       if (!this.allowMultiselect) {
         throw new Error('Multiple selection is not allowed')
       }
-      return this.enumItems(
-        (item: IItem): boolean => {
-          this.selectItem(item)
-          return true
-        }
-      )
+      return this.enumItems((item: IItem): boolean => {
+        this.selectItem(item)
+        return true
+      })
     }
 
-    selectItem (item: IItem): this {
+    selectItem(item: IItem): this {
       handleItem(this, item, () => {
         const xs = this.items
         if (!xs || !xs.has(item)) {
@@ -238,7 +240,7 @@ export function ItemContainerMixin<
       return this
     }
 
-    selectItemAt (index: number): this {
+    selectItemAt(index: number): this {
       const x = this.getItemAt(index)
       if (!x) {
         throw new Error(`Container doesn't contain item with index ${index}`)
@@ -246,7 +248,7 @@ export function ItemContainerMixin<
       return this.selectItem(x)
     }
 
-    selectNext (increment: number = 1): this {
+    selectNext(increment: number = 1): this {
       const n = this.itemCount
       if (increment !== 0 && n > 0) {
         const index = this.firstSelectedIndex
@@ -261,18 +263,18 @@ export function ItemContainerMixin<
       return this
     }
 
-    selectPrev (): this {
+    selectPrev(): this {
       return this.selectNext(-1)
     }
 
-    unselectAll (): this {
+    unselectAll(): this {
       for (const item of this.selectedItems) {
         this.unselectItem(item)
       }
       return this
     }
 
-    unselectItem (item: IItem): this {
+    unselectItem(item: IItem): this {
       handleItem(this, item, () => {
         const si = this.selectedItems
         if (!si.has(item)) {

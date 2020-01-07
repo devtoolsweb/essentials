@@ -13,20 +13,20 @@ export interface IItem extends INStructChild {
   updateSelection(isSelected?: boolean): void
 }
 
-export function ItemMixin<TBase extends INStructChildConstructor> (
+export function ItemMixin<TBase extends INStructChildConstructor>(
   Base: TBase
-) {
+): TBase & INStructChildConstructor<IItem> {
   return class Item extends Base implements IItem {
-    get itemContainer (): IBaseItemContainer | null {
+    get itemContainer(): IBaseItemContainer | null {
       return this.parent ? (this.parent as IBaseItemContainer) : null
     }
 
-    get isSelected (): boolean {
+    get isSelected(): boolean {
       const p = this.itemContainer
       return p ? p.isItemSelected(this) : false
     }
 
-    set isSelected (value: boolean) {
+    set isSelected(value: boolean) {
       const p = this.itemContainer
       if (p && value !== this.isSelected) {
         if (value) {
@@ -40,6 +40,6 @@ export function ItemMixin<TBase extends INStructChildConstructor> (
     /**
      * Called from container when item selection changes.
      */
-    updateSelection (_: boolean = false): void {}
+    updateSelection(_: boolean = false): void {}
   }
 }
