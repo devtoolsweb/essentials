@@ -14,7 +14,7 @@ import {
   INStructChild,
   INStructContainer,
   NStructChild,
-  NStructMixin
+  NStructContainerMixin
 } from './n_struct'
 
 export type DataNodeCreator = (
@@ -77,17 +77,17 @@ export class DataNodeEvent extends TypedEvent<IDataNodeEvents>
   implements IDataNodeEvent {
   readonly child?: IDataNode
 
-  constructor (p: IDataNodeEventOpts) {
+  constructor(p: IDataNodeEventOpts) {
     super(p)
     p.child && (this.child = p.child)
   }
 
-  get node (): IDataNode {
+  get node(): IDataNode {
     return this.origin as IDataNode
   }
 }
 
-export class BaseNStructDataNode extends NStructMixin<
+export class BaseNStructDataNode extends NStructContainerMixin<
   IDataNode,
   Constructor<NStructChild>
 >(NStructChild) {}
@@ -114,7 +114,7 @@ export class DataNode
 
   protected $value: DataNodeValue | IDataNode
 
-  constructor (p: IDataNodeOpts) {
+  constructor(p: IDataNodeOpts) {
     super({ ...p, name: DataNode.verifyName(p.name)! })
     this.$value = p.value === undefined ? null : p.value
     if (p.isEventTrap) {
@@ -122,7 +122,7 @@ export class DataNode
     }
   }
 
-  get fullPath (): string {
+  get fullPath(): string {
     const s = DataNode.pathSeparator
     const p = this.chain
       .map((x: INStructChild) => (x as IDataNode).name)
@@ -130,35 +130,35 @@ export class DataNode
     return `${s}${p}`
   }
 
-  get isEventTrap () {
+  get isEventTrap() {
     return this.flags.isSet('IsEventTrap')
   }
 
-  get isLink (): boolean {
+  get isLink(): boolean {
     return false
   }
 
-  get realPath (): string {
+  get realPath(): string {
     return this.fullPath
   }
 
-  get value (): DataNodeValue {
+  get value(): DataNodeValue {
     return this.$value as DataNodeValue
   }
 
-  set value (value: DataNodeValue) {
+  set value(value: DataNodeValue) {
     this.$value = value
     this.emitEvent(new DataNodeEvent({ origin: this, type: 'change' }))
   }
 
-  addChild (child: IDataNode): this {
+  addChild(child: IDataNode): this {
     super.addChild(child)
     return this.emitEvent(
       new DataNodeEvent({ child, origin: this, type: 'addChild' })
     )
   }
 
-  addSuccessorNode (path: string, node: IDataNode): this {
+  addSuccessorNode(path: string, node: IDataNode): this {
     if (path.trimLeft().charAt(0) === DataNode.pathSeparator) {
       throw new Error(
         `Path for successor of data node must be relative: "${path}"`
@@ -168,14 +168,14 @@ export class DataNode
     return this
   }
 
-  findChildNode (name: string): IDataNode | null {
+  findChildNode(name: string): IDataNode | null {
     const node = this.findChild(
       (x: INStructChild) => (x as IDataNode).name === name
     )
     return node ? (node as IDataNode) : null
   }
 
-  getBoolean (): boolean {
+  getBoolean(): boolean {
     let v = this.$value
     const t = typeof v
     if (t === 'boolean') {
@@ -192,7 +192,7 @@ export class DataNode
     return Boolean(v)
   }
 
-  getDate (): Date {
+  getDate(): Date {
     if (this.$value instanceof Date) {
       return this.$value
     } else {
@@ -204,7 +204,7 @@ export class DataNode
     }
   }
 
-  getFloat (): number {
+  getFloat(): number {
     let v = this.$value
     if (typeof v === 'number') {
       return v
@@ -221,11 +221,11 @@ export class DataNode
     }
   }
 
-  getInt (): number {
+  getInt(): number {
     return Math.trunc(this.getFloat())
   }
 
-  getString (): string {
+  getString(): string {
     const d = this.$value
     if (d === null) {
       throw new Error('Cannot convert null to string')
@@ -234,7 +234,7 @@ export class DataNode
     }
   }
 
-  getNodeByPath (path: string): IDataNode | null {
+  getNodeByPath(path: string): IDataNode | null {
     try {
       return this.walkPath(path, x => x)
     } catch (e) {
@@ -246,7 +246,7 @@ export class DataNode
    * Creates all data tree nodes according to the specified path.
    * The path may contain relative components.
    */
-  makePath (path: string, createNode?: DataNodeCreator): IDataNode | null {
+  makePath(path: string, createNode?: DataNodeCreator): IDataNode | null {
     return this.walkPath(
       path,
       (node: IDataNode | null, pathParts?: string[]): IDataNode => {
@@ -273,16 +273,16 @@ export class DataNode
     )
   }
 
-  removeChild (child: IDataNode): this {
+  removeChild(child: IDataNode): this {
     super.removeChild(child)
     return this.emitEvent(
       new DataNodeEvent({ child, origin: this, type: 'removeChild' })
     )
   }
 
-  toString (): string {
+  toString(): string {
     const parts: string[] = []
-    ;(function dump (node: IDataNode, indent: number = 0) {
+    ;(function dump(node: IDataNode, indent: number = 0) {
       const path = `${node.fullPath}${
         node.isLink ? ` ~ @${node.realPath}` : ''
       }`
@@ -296,7 +296,7 @@ export class DataNode
     return parts.join('\n')
   }
 
-  triggerChanges (_?: string[]): this {
+  triggerChanges(_?: string[]): this {
     throw new Error('Not implemented')
   }
 
@@ -305,7 +305,7 @@ export class DataNode
    * The path may contain relative components, such as relative components
    * in the file system path.
    */
-  walkPath (path: string, visit: DataNodeVisitor): IDataNode | null {
+  walkPath(path: string, visit: DataNodeVisitor): IDataNode | null {
     if (path.charAt(0) === ' ' || path.charAt(path.length - 1) === ' ') {
       throw new Error(
         `Path to data node must not be enclosed in spaces: "${path}"`
@@ -349,7 +349,7 @@ export class DataNode
     return node
   }
 
-  protected emitEvent (event: IDataNodeEvent): this {
+  protected emitEvent(event: IDataNodeEvent): this {
     let p = this.parent
     while (p) {
       const dn = p as IDataNode
@@ -362,7 +362,7 @@ export class DataNode
     return this
   }
 
-  static verifyName (name?: string): string {
+  static verifyName(name?: string): string {
     if (!name || !DataNode.nodeNameRegexp.test(name)) {
       throw new Error(`Invalid name for data node: "${name}"`)
     }

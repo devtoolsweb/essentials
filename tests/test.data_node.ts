@@ -42,6 +42,19 @@ test('addChild', () => {
   expect(n).toBe(2)
 })
 
+test('removeChild', () => {
+  const parent = new DataNode({ name: 'parent' })
+  const n = 10
+  for (let i = 0; i < n; i++) {
+    parent.addChild(new DataNode({ value: i, name: `child ${i}` }))
+  }
+  let c = parent.getChildAt(5)!
+  expect(c.value).toBe(5)
+  parent.removeChild(c)
+  c = parent.getChildAt(5)!
+  expect(c.value).toBe(6)
+})
+
 test('addSuccessorNode', () => {
   const parent = new DataNode({ name: 'parent' })
   parent.addSuccessorNode('a/b/c', new DataNode({ name: 'successor 1' }))

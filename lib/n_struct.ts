@@ -1,9 +1,10 @@
 /**
  * NStruct implements nested hierarchy of objects.
  */
-import { IBaseClass, BaseClass, IBaseClassOpts } from './base_class'
+import { Constructor, IDisposable } from '@aperos/ts-goodies'
+import { BaseClass, IBaseClassOpts } from './base_class'
 
-export interface INStructChild extends IBaseClass {
+export interface INStructChild extends IDisposable {
   readonly chain: INStructChild[]
   readonly childIndex: number
   readonly level: number
@@ -11,7 +12,6 @@ export interface INStructChild extends IBaseClass {
   readonly root: INStructContainer | null
   hasAncestor(s: INStructContainer): boolean
   isContainer: boolean
-  toJSON(): object
   unlink(): this
   updateParent(): void
 }
@@ -41,7 +41,6 @@ export interface INStructContainer<T extends INStructChild = INStructChild>
   releaseTree(): void
   removeChild(child: T): this
   removeChildren(): this
-  toJSON(): object
   traverseTree(
     visit: (x: INStructChild) => NStructVisitorResult,
     downwards?: boolean
@@ -72,83 +71,83 @@ export function isNStructContainer(
   return !!c && c.isContainer
 }
 
-export class NStructChild extends BaseClass implements INStructChild {
-  /**
-   * Returns a hierarchical chain of objects, starting with the root
-   * and ending with the current one.
-   */
-  get chain(): INStructChild[] {
-    const a = []
-    let p: INStructChild | null = this
-    while (p) {
-      a.unshift(p)
-      p = p.parent
-    }
-    return a
-  }
-
-  /**
-   * Returns the current index of the object in the collection of child
-   * objects of the parent object, or -1 if the object does not
-   * have a parent object.
-   */
-  get childIndex(): number {
-    let i = 0
-    for (let c of this.parent || []) {
-      if (c === this) {
-        return i
+export function NStructChildMixin<TBase extends Constructor<IDisposable>>(
+  Base: TBase
+): TBase & Constructor<INStructChild> {
+  return class NStruct extends Base implements INStructChild {
+    /**
+     * Returns a hierarchical chain of objects, starting with the root
+     * and ending with the current one.
+     */
+    get chain(): INStructChild[] {
+      const a = []
+      let p: INStructChild | null = this
+      while (p) {
+        a.unshift(p)
+        p = p.parent
       }
-      i++
+      return a
     }
-    return -1
-  }
 
-  get isContainer(): boolean {
-    return false
-  }
-
-  get level(): number {
-    return this.parent ? this.parent.level + 1 : 0
-  }
-
-  get parent(): INStructContainer | null {
-    const p = (this as any)[symParent]
-    return p ? (p as INStructContainer) : null
-  }
-
-  get root(): INStructContainer | null {
-    return this.parent ? this.parent.root : null
-  }
-
-  hasAncestor(s: INStructContainer): boolean {
-    let x: INStructContainer | null = this.parent
-    while (x) {
-      if (x === s) {
-        return true
+    /**
+     * Returns the current index of the object in the collection of child
+     * objects of the parent object, or -1 if the object does not
+     * have a parent object.
+     */
+    get childIndex(): number {
+      let i = 0
+      for (let c of this.parent || []) {
+        if (c === this) {
+          return i
+        }
+        i++
       }
-      x = x.parent
+      return -1
     }
-    return false
-  }
 
-  toJSON(): object {
-    return { ...super.toJSON(), level: this.level }
-  }
-
-  unlink(): this {
-    if (this.parent) {
-      this.parent.removeChild(this)
+    get isContainer(): boolean {
+      return false
     }
-    return this
-  }
 
-  /**
-   * Fires when a node changes the parent node.
-   */
-  updateParent() {}
+    get level(): number {
+      return this.parent ? this.parent.level + 1 : 0
+    }
+
+    get parent(): INStructContainer | null {
+      const p = (this as any)[symParent]
+      return p ? (p as INStructContainer) : null
+    }
+
+    get root(): INStructContainer | null {
+      return this.parent ? this.parent.root : null
+    }
+
+    hasAncestor(s: INStructContainer): boolean {
+      let x: INStructContainer | null = this.parent
+      while (x) {
+        if (x === s) {
+          return true
+        }
+        x = x.parent
+      }
+      return false
+    }
+
+    unlink(): this {
+      if (this.parent) {
+        this.parent.removeChild(this)
+      }
+      return this
+    }
+
+    /**
+     * Fires when a node changes the parent node.
+     */
+    updateParent() {}
+  }
 }
 
-export function NStructMixin<
+export function NStructContainerMixin<
   T extends INStructChild = INStructChild,
   TBase extends INStructChildConstructor = INStructChildConstructor
 >(Base: TBase): TBase & INStructContainerConstructor<INStructContainer<T>> {
@@ -250,6 +249,11 @@ export function NStructMixin<
       return this
     }
 
+    dispose() {
+      this.releaseTree()
+      super.dispose()
+    }
+
     /**
      * WARNING: You cannot add or remove children while enumerating.
      */
@@ -264,11 +268,6 @@ export function NStructMixin<
           }
         }
       }
-    }
-
-    finalize() {
-      this.releaseTree()
-      super.finalize()
     }
 
     findChild(predicate: (c: T) => boolean): T | null {
@@ -316,7 +315,7 @@ export function NStructMixin<
         // There is no need to remove children from collection.
         const x: T = xs.pop()!
         ;(x as any)[symMarkForDeletion] = true
-        x.finalize()
+        x.dispose()
       }
       if (this.parent && !(this as any)[symMarkForDeletion]) {
         this.parent.removeChild(this)
@@ -356,14 +355,6 @@ export function NStructMixin<
       return this
     }
 
-    toJSON(): object {
-      const children = new Array<object>()
-      this.enumChildren(c => {
-        children.push(c.toJSON())
-      })
-      return Object.assign(super.toJSON(), { children })
-    }
-
     /**
      * Performs a complete traversal of the hierarchy of objects,
      * invoking the "visit" function on each object.
@@ -398,3 +389,7 @@ export function NStructMixin<
     }
   }
 }
+
+export class NStructChild extends NStructChildMixin<Constructor<BaseClass>>(
+  BaseClass
+) {}

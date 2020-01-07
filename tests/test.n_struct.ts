@@ -4,7 +4,7 @@ import {
   INStructChild,
   INStructContainer,
   NStructChild,
-  NStructMixin,
+  NStructContainerMixin,
   isNStructContainer
 } from '../lib'
 
@@ -20,16 +20,17 @@ interface TestClass {
   readonly flags: IBitFlags<TestClassFlags>
 }
 
-class TestClass extends NStructMixin(NStructChild) implements ITestClass {
+class TestClass extends NStructContainerMixin(NStructChild)
+  implements ITestClass {
   readonly value = lastValue++
 
-  toJSON (): object {
+  toJSON(): object {
     this.flags.set('Test')
     return Object.assign(super.toJSON(), { value: this.value })
   }
 }
 
-function makeTree (
+function makeTree(
   depth = 0,
   minNodes = 3,
   parent: INStructContainer | null = null,
@@ -80,7 +81,7 @@ test('enum children', () => {
   expect(s).toBe(((2 * fc.value + n - 1) * n) / 2)
 })
 
-test('finalize', () => {
+test('dispose', () => {
   const parent = new TestClass()
   const a = makeTree(3, 5)
   const b = makeTree(3, 5)
@@ -90,9 +91,9 @@ test('finalize', () => {
     .addChild(b)
     .addChild(c)
   expect(parent.childCount).toBe(3)
-  b.finalize()
+  b.dispose()
   expect(parent.childCount).toBe(2)
-  a.finalize()
+  a.dispose()
   expect(parent.childCount).toBe(1)
 })
 
