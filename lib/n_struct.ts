@@ -148,7 +148,7 @@ export class NStructChild extends BaseClass implements INStructChild {
   updateParent() {}
 }
 
-export function NStructMixin<
+export function NStructContainerMixin<
   T extends INStructChild = INStructChild,
   TBase extends INStructChildConstructor = INStructChildConstructor
 >(Base: TBase): TBase & INStructContainerConstructor<INStructContainer<T>> {

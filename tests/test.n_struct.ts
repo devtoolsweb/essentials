@@ -4,7 +4,7 @@ import {
   INStructChild,
   INStructContainer,
   NStructChild,
-  NStructMixin,
+  NStructContainerMixin,
   isNStructContainer
 } from '../lib'
 
@@ -20,16 +20,17 @@ interface TestClass {
   readonly flags: IBitFlags<TestClassFlags>
 }
 
-class TestClass extends NStructMixin(NStructChild) implements ITestClass {
+class TestClass extends NStructContainerMixin(NStructChild)
+  implements ITestClass {
   readonly value = lastValue++
 
-  toJSON (): object {
+  toJSON(): object {
     this.flags.set('Test')
     return Object.assign(super.toJSON(), { value: this.value })
   }
 }
 
-function makeTree (
+function makeTree(
   depth = 0,
   minNodes = 3,
   parent: INStructContainer | null = null,

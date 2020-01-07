@@ -1,7 +1,7 @@
 /**
  * WARNING: When declaring an object, ItemizedMixin should follow
- * after NStructMixin in the list of mixins, so that some methods
- * of the NStructMixin can be overridden.
+ * after NStructContainerMixin in the list of mixins, so that some
+ * methods of the NStructContainerMixin can be overridden.
  */
 import { IBitFlags } from '@aperos/ts-goodies'
 import {
