@@ -39,6 +39,11 @@ export function ClassName(name: string) {
   }
 }
 
+export interface BaseClass {
+  readonly flags: IBitFlags<BaseClassFlags>
+  readonly className: string
+}
+
 @BitFlagged
 @ClassName('BaseClass')
 export class BaseClass implements IBaseClass {
@@ -46,14 +51,6 @@ export class BaseClass implements IBaseClass {
     if (p) {
       p.name && ((this as any)[symName] = p.name)
     }
-  }
-
-  get className(): string {
-    throw new Error('Class name must be set in the decorator')
-  }
-
-  get flags(): IBitFlags<BaseClassFlags> {
-    throw new Error('Flags must be set in the decorator')
   }
 
   get hasChanged(): boolean {
@@ -80,12 +77,6 @@ export class BaseClass implements IBaseClass {
     return c
   }
 
-  /**
-   * In order to be able to make exact copies of the object,
-   * the original object must be a clone of the current one.
-   */
-  copyFrom(_: IBaseClass): void {}
-
   dispose() {}
 
   toJSON(): object {
@@ -102,6 +93,14 @@ export class BaseClass implements IBaseClass {
 
   protected approveChanges(): this {
     this.flags.unset('HasChanged')
+    return this
+  }
+
+  /**
+   * In order to be able to make exact copies of the object,
+   * the original object must be a clone of the current one.
+   */
+  protected copyFrom(_source: IBaseClass): this {
     return this
   }
 }
