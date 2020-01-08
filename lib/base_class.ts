@@ -6,6 +6,7 @@ const classNameMap = new Map<string, string>()
 export interface IBaseClass extends IDisposable {
   name: string
   readonly className: string
+  copyFrom(source: IBaseClass): this
   toJSON(): object
 }
 
@@ -77,6 +78,14 @@ export class BaseClass implements IBaseClass {
     return c
   }
 
+  /**
+   * In order to be able to make exact copies of the object,
+   * the original object must be a clone of the current one.
+   */
+  copyFrom(_source: IBaseClass) {
+    return this
+  }
+
   dispose() {}
 
   toJSON(): object {
@@ -96,11 +105,4 @@ export class BaseClass implements IBaseClass {
     return this
   }
 
-  /**
-   * In order to be able to make exact copies of the object,
-   * the original object must be a clone of the current one.
-   */
-  protected copyFrom(_source: IBaseClass): this {
-    return this
-  }
 }
