@@ -1,5 +1,6 @@
 /**
  * NStruct implements nested hierarchy of objects.
+ * TODO: use undefined instead of null
  */
 import { Constructor, IDisposable } from '@aperos/ts-goodies'
 import { BaseClass, IBaseClassOpts, IBaseClass } from './base_class'
