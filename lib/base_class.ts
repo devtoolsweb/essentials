@@ -1,7 +1,7 @@
 import { BitFlagged, IBitFlags, IDisposable } from '@aperos/ts-goodies'
 
 const symName = Symbol('BaseClass.name')
-const classNameMap = new Map<string, string>()
+const classNameMap = new Map<Function, string>()
 
 export interface IBaseClass extends IDisposable {
   name: string
@@ -30,11 +30,10 @@ export function ClassName(name: string) {
         throw new Error(`Custom class name already in use: '${name}'`)
       }
     }
-    xs.set(ctor.name, name)
+    xs.set(ctor, name)
     Object.defineProperty(ctor.prototype, 'className', {
       get: function() {
-        const cn = this.constructor.name
-        return xs.get(cn) || cn
+        return xs.get(this.constructor)
       }
     })
   }
@@ -59,7 +58,7 @@ export class BaseClass implements IBaseClass {
   }
 
   get name(): string {
-    return (this as any)[symName] || ''
+    return (this as any)[symName]
   }
 
   set name(value: string) {
@@ -104,5 +103,4 @@ export class BaseClass implements IBaseClass {
     this.flags.unset('HasChanged')
     return this
   }
-
 }

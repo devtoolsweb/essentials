@@ -1,9 +1,13 @@
 import { BaseClass, ClassName } from '../lib'
 
-@ClassName('T')
+@ClassName('TestClassName')
 class TestClass extends BaseClass {}
+
+class DerivedClass extends TestClass {}
 
 test('@ClassName() decorator', () => {
   const c = new TestClass()
-  expect(c.className).toBe('T')
+  const d = new DerivedClass()
+  expect(c.className).toBe('TestClassName')
+  expect(d.className).toBeUndefined()
 })
