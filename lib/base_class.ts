@@ -6,7 +6,10 @@ const classNameMap = new Map<Function, string>()
 export interface IBaseClass extends IDisposable {
   name: string
   readonly className: string
+  readonly isEnabled: boolean
   copyFrom(source: IBaseClass): this
+  disable(): this
+  enable(): this
   toJSON(): object
 }
 
@@ -20,7 +23,7 @@ export interface IBaseClassConstructor {
 
 export type BaseClassConstructor = new (p?: IBaseClassOpts) => IBaseClass
 
-export type BaseClassFlags = 'HasChanged'
+export type BaseClassFlags = 'HasChanged' | 'IsDisabled'
 
 export function ClassName(name: string) {
   return function(ctor: Function) {
@@ -57,6 +60,10 @@ export class BaseClass implements IBaseClass {
     return this.flags.isSet('HasChanged')
   }
 
+  get isEnabled(): boolean {
+    return !this.flags.isSet('IsDisabled')
+  }
+
   get name(): string {
     return (this as any)[symName]
   }
@@ -86,6 +93,16 @@ export class BaseClass implements IBaseClass {
   }
 
   dispose() {}
+
+  disable(): this {
+    this.flags.set('IsDisabled')
+    return this
+  }
+
+  enable(): this {
+    this.flags.unset('IsDisabled')
+    return this
+  }
 
   toJSON(): object {
     return {
