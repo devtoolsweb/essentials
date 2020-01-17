@@ -14,7 +14,7 @@ export interface IItem extends INStructChild {
   updateSelection(isSelected?: boolean): void
 }
 
-export function ItemMixin<TBase extends INStructChildConstructor<IItem>>(
+export function ItemMixin<TBase extends INStructChildConstructor>(
   Base: TBase
 ): TBase & INStructChildConstructor<IItem> {
   return class Item extends Base implements IItem {

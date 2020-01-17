@@ -394,3 +394,18 @@ export function NStructContainerMixin<
 export class NStructChild extends NStructChildMixin<Constructor<IBaseClass>>(
   BaseClass
 ) {}
+
+export function NStructBaseContainerWrapper<
+  T extends INStructChild,
+  TBase extends INStructChildConstructor = INStructChildConstructor
+>(Base: TBase) {
+  return class extends Base {
+    readonly [Symbol.iterator]!: () => IterableIterator<T>
+    readonly children!: Set<T>
+    readonly enumChildren!: (
+      visit: NStructChildVisitor<T>
+    ) => NStructVisitorResult
+    readonly findChild!: (predicate: (c: T) => boolean) => T | null
+    readonly getChildAt!: (index: number) => T | null
+  }
+}

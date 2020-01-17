@@ -3,15 +3,14 @@
  * after NStructContainerMixin in the list of mixins, so that some
  * methods of the NStructContainerMixin can be overridden.
  */
-import { IBitFlags } from '@aperos/ts-goodies'
+import { IBitFlags, IConstructor } from '@aperos/ts-goodies'
 import {
   INStructChild,
-  INStructContainer,
-  INStructContainerConstructor
+  INStructContainerConstructor,
+  INStructContainer
 } from './n_struct'
 import { BaseClassFlags } from './base_class'
 import { IBaseItemContainer, IItem } from './item'
-import { IConstructor } from './types'
 
 export type ItemContainerFlags =
   | 'AllowMultiselect'
@@ -63,10 +62,13 @@ const handleItem = (c: IItemContainer, item: IItem, body: () => void) => {
 
 const emptyItems = Object.freeze(new Set<IItem>())
 
+export interface IItemContainerConstructor<T extends IItem = IItem>
+  extends INStructContainerConstructor<IItemContainer<T>> {}
+
 export function ItemContainerMixin<
   T extends IItem,
   TBase extends IConstructor<INStructContainer<T>>
->(Base: TBase): TBase & INStructContainerConstructor<IItemContainer<T>> {
+>(Base: TBase): TBase & IItemContainerConstructor<T> {
   return class ItemContainer extends Base implements IItemContainer<T> {
     readonly flags!: IBitFlags<ItemContainerFlags>
 

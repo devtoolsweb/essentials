@@ -2,11 +2,12 @@ import {
   ItemContainerMixin,
   ItemMixin,
   NStructChild,
-  NStructContainerMixin
+  NStructContainerMixin,
+  IItem
 } from '../lib'
 
 class Test extends ItemContainerMixin(
-  ItemMixin(NStructContainerMixin(NStructChild))
+  ItemMixin(NStructContainerMixin<IItem>(NStructChild))
 ) {}
 
 const createItemized = (n: number = 10): Test => {
