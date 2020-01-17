@@ -1,10 +1,11 @@
 import { INStructChildConstructor } from './n_struct'
 import { INStructContainer, INStructChild } from './n_struct'
 
-export interface IBaseItemContainer extends INStructContainer {
-  isItemSelected(item: IItem): boolean
-  selectItem(item: IItem): this
-  unselectItem(item: IItem): this
+export interface IBaseItemContainer<T extends IItem = IItem>
+  extends INStructContainer<T> {
+  isItemSelected(item: T): boolean
+  selectItem(item: T): this
+  unselectItem(item: T): this
 }
 
 export interface IItem extends INStructChild {
@@ -13,7 +14,7 @@ export interface IItem extends INStructChild {
   updateSelection(isSelected?: boolean): void
 }
 
-export function ItemMixin<TBase extends INStructChildConstructor>(
+export function ItemMixin<TBase extends INStructChildConstructor<IItem>>(
   Base: TBase
 ): TBase & INStructChildConstructor<IItem> {
   return class Item extends Base implements IItem {

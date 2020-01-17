@@ -18,23 +18,24 @@ export type ItemContainerFlags =
   | 'RoundRobin'
   | BaseClassFlags
 
-export interface IItemContainer extends IBaseItemContainer {
+export interface IItemContainer<T extends IItem = IItem>
+  extends IBaseItemContainer<T> {
   roundRobin: boolean
   allowMultiselect: boolean
   readonly itemCount: number
-  readonly items: Iterable<IItem> | null
+  readonly items: Iterable<T> | null
   readonly selectedCount: number
   readonly firstSelectedIndex: number
-  enumItems(visit: (item: IItem, index?: number) => boolean): this
-  enumSelectedItems(visit: (item: IItem) => boolean): this
-  getItemAt(index: number): IItem | null
-  isItemSelected(item: IItem): boolean
+  enumItems(visit: (item: T, index?: number) => boolean): this
+  enumSelectedItems(visit: (item: T) => boolean): this
+  getItemAt(index: number): T | null
+  isItemSelected(item: T): boolean
   selectAll(): this
-  selectItem(item: IItem): this
+  selectItem(item: T): this
   selectItemAt(index: number): this
   selectNext(increment?: number): this
   unselectAll(): this
-  unselectItem(item: IItem): this
+  unselectItem(item: T): this
 }
 
 const symInProcessItems = Symbol('ItemContainer.inProcessItems')
@@ -63,9 +64,10 @@ const handleItem = (c: IItemContainer, item: IItem, body: () => void) => {
 const emptyItems = Object.freeze(new Set<IItem>())
 
 export function ItemContainerMixin<
-  TBase extends IConstructor<INStructContainer>
->(Base: TBase): TBase & INStructContainerConstructor<IItemContainer> {
-  return class ItemContainer extends Base implements IItemContainer {
+  T extends IItem,
+  TBase extends IConstructor<INStructContainer<T>>
+>(Base: TBase): TBase & INStructContainerConstructor<IItemContainer<T>> {
+  return class ItemContainer extends Base implements IItemContainer<T> {
     readonly flags!: IBitFlags<ItemContainerFlags>
 
     /**
@@ -78,8 +80,8 @@ export function ItemContainerMixin<
     /**
      * Returns an iterable collection of child items.
      */
-    get items(): Set<IItem> | null {
-      return this.children as Set<IItem>
+    get items(): Set<T> | null {
+      return this.children as Set<T>
     }
 
     /**
@@ -101,7 +103,7 @@ export function ItemContainerMixin<
       return this.selectedItems.size
     }
 
-    get selectedItems(): Set<IItem> {
+    get selectedItems(): Set<T> {
       return (this as any)[symSelectedItems] || emptyItems
     }
 
@@ -122,7 +124,7 @@ export function ItemContainerMixin<
       return -1
     }
 
-    get firstSelectedItem(): IItem | null {
+    get firstSelectedItem(): T | null {
       const si = this.selectedItems
       if (si.size > 0) {
         for (const item of this.items!) {
@@ -165,7 +167,7 @@ export function ItemContainerMixin<
      * The collection of items may not coincide with the collection of children,
      * so we can't use method enumChildren() here.
      */
-    enumItems(visit: (item: IItem, index?: number) => boolean): this {
+    enumItems(visit: (item: T, index?: number) => boolean): this {
       if (this.itemCount > 0) {
         let i = 0
         for (const item of this.items!) {
@@ -177,7 +179,7 @@ export function ItemContainerMixin<
       return this
     }
 
-    enumSelectedItems(visit: (item: IItem) => boolean): this {
+    enumSelectedItems(visit: (item: T) => boolean): this {
       for (const item of this.selectedItems) {
         if (visit(item) === false) {
           break
@@ -190,7 +192,7 @@ export function ItemContainerMixin<
      * The collection of items may not coincide with the collection of children,
      * so we can't use method getChildAt() here.
      */
-    getItemAt(index: number): IItem | null {
+    getItemAt(index: number): T | null {
       const xs = this.items
       if (xs && index >= 0 && index < xs.size) {
         let i = 0
@@ -203,26 +205,26 @@ export function ItemContainerMixin<
       return null
     }
 
-    isItemSelected(item: IItem): boolean {
+    isItemSelected(item: T): boolean {
       return this.selectedItems.has(item)
     }
 
     removeChild(child: INStructChild): this {
-      this.unselectItem(child as IItem)
-      return super.removeChild(child)
+      this.unselectItem(child as T)
+      return super.removeChild(child as T)
     }
 
     selectAll(): this {
       if (!this.allowMultiselect) {
         throw new Error('Multiple selection is not allowed')
       }
-      return this.enumItems((item: IItem): boolean => {
+      return this.enumItems((item: T): boolean => {
         this.selectItem(item)
         return true
       })
     }
 
-    selectItem(item: IItem): this {
+    selectItem(item: T): this {
       handleItem(this, item, () => {
         const xs = this.items
         if (!xs || !xs.has(item)) {
@@ -274,7 +276,7 @@ export function ItemContainerMixin<
       return this
     }
 
-    unselectItem(item: IItem): this {
+    unselectItem(item: T): this {
       handleItem(this, item, () => {
         const si = this.selectedItems
         if (!si.has(item)) {
