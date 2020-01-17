@@ -395,10 +395,15 @@ export class NStructChild extends NStructChildMixin<Constructor<IBaseClass>>(
   BaseClass
 ) {}
 
+/**
+ * This mixin allows you to substitute the necessary type of children
+ * when the base class is already a container, but with a different
+ * type of children.
+ */
 export function NStructBaseContainerWrapper<
   T extends INStructChild,
-  TBase extends INStructChildConstructor = INStructChildConstructor
->(Base: TBase) {
+  TBase extends INStructContainerConstructor<INStructContainer<INStructChild>>
+>(Base: TBase): TBase & INStructContainerConstructor<INStructContainer<T>> {
   return class extends Base {
     readonly [Symbol.iterator]!: () => IterableIterator<T>
     readonly children!: Set<T>
