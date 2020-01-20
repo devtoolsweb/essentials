@@ -260,7 +260,7 @@ export function ItemContainerMixin<
         let nextIndex = this.roundRobin
           ? (index + n + (increment % n)) % n
           : index + increment
-        if (index >= 0 && index < n) {
+        if (nextIndex >= 0 && nextIndex < n) {
           this.selectItemAt(nextIndex)
         }
       }
