@@ -8,11 +8,11 @@ import { BaseClass, IBaseClassOpts, IBaseClass } from './base_class'
 export interface INStructChild extends IDisposable {
   readonly chain: INStructChild[]
   readonly childIndex: number
+  readonly isContainer: boolean
   readonly level: number
   readonly parent: INStructContainer | null
   readonly root: INStructContainer | null
   hasAncestor(s: INStructContainer): boolean
-  isContainer: boolean
   unlink(): this
   updateParent(): void
 }
