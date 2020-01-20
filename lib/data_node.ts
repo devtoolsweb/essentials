@@ -39,7 +39,7 @@ export interface IDataNode
   extends ITypedEventEmitter<IDataNodeEvents>,
     IBaseClass,
     INStructChild,
-    INStructContainer {
+    INStructContainer<IDataNode> {
   value: DataNodeValue
   readonly fullPath: string
   readonly isEventTrap: boolean
