@@ -4,8 +4,8 @@ import {
   EventEmitterMixin,
   IBaseEvents,
   ITypedEvent,
-  ITypedEventOpts,
   ITypedEventEmitter,
+  ITypedEventOpts,
   TypedEvent
 } from '@aperos/event-emitter'
 import { Constructor } from './types'
@@ -44,6 +44,7 @@ export interface IDataNode
   readonly fullPath: string
   readonly isEventTrap: boolean
   readonly isLink: boolean
+  readonly parent: IDataNode | null
   readonly realPath: string
   addChild(child: IDataNode): this
   addSuccessorNode(path: string, node: IDataNode): this
@@ -56,6 +57,7 @@ export interface IDataNode
   getString(): string
   makePath(path: string, createNode?: DataNodeCreator): IDataNode | null
   removeChild(child: IDataNode): this
+  setValue(value: DataNodeValue): this
   walkPath(path: string, visit: DataNodeVisitor): IDataNode | null
 }
 
@@ -101,6 +103,7 @@ export type DataNodeFlags = 'IsEventTrap' | BaseClassFlags
 
 export interface DataNode {
   readonly flags: IBitFlags<DataNodeFlags>
+  readonly parent: IDataNode | null
 }
 
 export class DataNode
@@ -281,6 +284,11 @@ export class DataNode
     )
   }
 
+  setValue(value: DataNodeValue) {
+    this.value = value
+    return this
+  }
+
   toString(): string {
     const parts: string[] = []
     ;(function dump(node: IDataNode, indent: number = 0) {
@@ -331,7 +339,7 @@ export class DataNode
             throw new Error(`Invalid data node path: "${path}"`)
           }
           fp.pop()
-          node = visit(node.parent as IDataNode, fp)
+          node = visit(node.parent, fp)
         } else {
           DataNode.verifyName(name)
           fp.push(name)

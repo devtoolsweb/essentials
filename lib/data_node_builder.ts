@@ -1,6 +1,6 @@
 import { DataNode, IDataNode } from './data_node'
 import { DataNodeLink } from './data_node_link'
-import { StringUtils } from '@aperos/ts-goodies'
+import { StringUtils, Memoize } from '@aperos/ts-goodies'
 
 export interface IDataNodeBuilderOpts {
   camelCaseToKebab?: boolean
@@ -126,5 +126,12 @@ export class DataNodeBuilder implements IDataNodeBuilder {
   private createTimestamp(name: string, value: string): IDataNode | null {
     const m = value.match(/^@timestamp:\s*(.*)$/)
     return m ? new DataNode({ name, value: new Date(parseInt(m[1])) }) : null
+  }
+
+  @Memoize()
+  static get standard(): IDataNodeBuilder {
+    return new DataNodeBuilder({
+      camelCaseToKebab: true
+    })
   }
 }
