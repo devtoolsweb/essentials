@@ -52,7 +52,7 @@ const handleItem = (c: IItemContainer, item: IItem, body: () => void) => {
   }
 }
 
-const emptyItems = Object.freeze(new Set<IItem>())
+const emptyItems = Object.freeze(new Array<IItem>())
 
 export interface IItemContainerConstructor<T extends IItem = IItem>
   extends INStructContainerConstructor<IItemContainer<T>> {}
@@ -74,8 +74,8 @@ export function ItemContainerMixin<
     /**
      * Returns an iterable collection of child items.
      */
-    get items(): Set<T> | null {
-      return this.children as Set<T>
+    get items(): Array<T> | null {
+      return this.children as Array<T>
     }
 
     /**
@@ -83,7 +83,7 @@ export function ItemContainerMixin<
      * so we can't use property childCount here.
      */
     get itemCount(): number {
-      return this.items ? this.items.size : 0
+      return this.items ? this.items.length : 0
     }
 
     /**
@@ -188,13 +188,8 @@ export function ItemContainerMixin<
      */
     getItemAt(index: number): T | null {
       const xs = this.items
-      if (xs && index >= 0 && index < xs.size) {
-        let i = 0
-        for (const x of xs) {
-          if (i++ === index) {
-            return x
-          }
-        }
+      if (xs && index >= 0 && index < xs.length) {
+        return xs[index]
       }
       return null
     }
@@ -222,8 +217,7 @@ export function ItemContainerMixin<
 
     selectItem(item: T): this {
       handleItem(this, item, () => {
-        const xs = this.items
-        if (!xs || !xs.has(item)) {
+        if (item.parent !== this) {
           throw new Error('Item is not in the container')
         }
         if (!this.allowMultiselect) {

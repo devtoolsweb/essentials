@@ -24,10 +24,9 @@ export type NStructChildVisitor<T extends INStructChild> = (
   index?: number
 ) => NStructVisitorResult
 
-export interface INStructContainer<T extends INStructChild = INStructChild>
-  extends INStructChild {
+export interface INStructContainer<T extends INStructChild = INStructChild> extends INStructChild {
   readonly childCount: number
-  readonly children: Set<T> | null
+  readonly children: Array<T> | null
   readonly firstChild: INStructChild | null
   readonly hasChildren: boolean
   readonly isLeaf: boolean
@@ -50,15 +49,11 @@ export interface INStructContainer<T extends INStructChild = INStructChild>
 
 export interface INStructChildOpts extends IBaseClassOpts {}
 
-export interface INStructChildConstructor<
-  T extends INStructChild = INStructChild
-> {
+export interface INStructChildConstructor<T extends INStructChild = INStructChild> {
   new (...args: any[]): T
 }
 
-export interface INStructContainerConstructor<
-  T extends INStructContainer = INStructContainer
-> {
+export interface INStructContainerConstructor<T extends INStructContainer = INStructContainer> {
   new (...args: any[]): T
 }
 
@@ -66,16 +61,23 @@ const symChildren = Symbol('NStruct.children')
 const symParent = Symbol('NStruct.parent')
 const symMarkForDeletion = Symbol('NStruct.markForDeletion')
 
-export function isNStructContainer(
-  c?: INStructChild | null
-): c is INStructContainer {
+interface IChild extends INStructChild {
+  [symParent]?: INStructContainer
+  [symMarkForDeletion]?: boolean
+}
+
+interface IParent<T extends INStructChild> extends INStructContainer<T> {
+  [symChildren]?: Array<T>
+}
+
+export function isNStructContainer(c?: INStructChild | null): c is INStructContainer {
   return !!c && c.isContainer
 }
 
 export function NStructChildMixin<TBase extends Constructor<IDisposable>>(
   Base: TBase
 ): TBase & Constructor<INStructChild> {
-  return class NStruct extends Base implements INStructChild {
+  return class NStruct extends Base implements INStructChild, IChild {
     /**
      * Returns a hierarchical chain of objects, starting with the root
      * and ending with the current one.
@@ -115,7 +117,7 @@ export function NStructChildMixin<TBase extends Constructor<IDisposable>>(
     }
 
     get parent(): INStructContainer | null {
-      const p = (this as any)[symParent]
+      const p = (this as IChild)[symParent]
       return p ? (p as INStructContainer) : null
     }
 
@@ -152,16 +154,16 @@ export function NStructContainerMixin<
   T extends INStructChild = INStructChild,
   TBase extends INStructChildConstructor = INStructChildConstructor
 >(Base: TBase): TBase & INStructContainerConstructor<INStructContainer<T>> {
-  return class NStruct extends Base implements INStructContainer<T> {
+  return class NStruct extends Base implements INStructContainer<T>, IParent<T> {
     /**
      * Collection of child objects.
      */
-    get children(): Set<T> | null {
-      return (this as any)[symChildren] || null
+    get children(): Array<T> | null {
+      return (this as IParent<T>)[symChildren] || null
     }
 
     get childCount(): number {
-      return this.children ? this.children.size : 0
+      return this.children ? this.children.length : 0
     }
 
     /**
@@ -169,7 +171,7 @@ export function NStructContainerMixin<
      * or null if the collection is empty.
      */
     get firstChild(): T | null {
-      return this.children ? this.children.values().next().value : null
+      return this.children ? this.children[0] : null
     }
 
     get hasChildren(): boolean {
@@ -233,14 +235,12 @@ export function NStructContainerMixin<
           p = p.parent
         }
       }
-      ;(child as any)[symParent] = this
-
-      let xs = this.children || new Set<T>()
+      let xs = this.children || new Array<T>()
       if (!this.children) {
-        ;(this as any)[symChildren] = xs
+        ;(this as IParent<T>)[symChildren] = xs
       }
-
-      xs.add(child)
+      xs.push(child)
+      ;(child as IChild)[symParent] = this
       child.updateParent()
       return this
     }
@@ -289,13 +289,8 @@ export function NStructContainerMixin<
      */
     getChildAt(index: number): T | null {
       const xs = this.children
-      if (xs && index >= 0 && index < xs.size) {
-        let i = 0
-        for (const x of xs) {
-          if (i++ === index) {
-            return x
-          }
-        }
+      if (xs && index >= 0 && index < xs.length) {
+        return xs[index]
       }
       return null
     }
@@ -315,10 +310,10 @@ export function NStructContainerMixin<
       while (xs.length > 0) {
         // There is no need to remove children from collection.
         const x: T = xs.pop()!
-        ;(x as any)[symMarkForDeletion] = true
+        ;(x as IChild)[symMarkForDeletion] = true
         x.dispose()
       }
-      if (this.parent && !(this as any)[symMarkForDeletion]) {
+      if (this.parent && !(this as IChild)[symMarkForDeletion]) {
         this.parent.removeChild(this)
       }
     }
@@ -331,15 +326,13 @@ export function NStructContainerMixin<
       if (child.parent !== this) {
         throw new Error('Child node is not owned by object')
       }
-      const xs = this.children
-      if (xs && xs.has(child)) {
-        delete (child as any)[symParent]
-        xs.delete(child)
-        if (xs.size === 0) {
-          delete (this as any)[symChildren]
-        }
-        child.updateParent()
+      const xs = this.children!
+      xs.some((x, i) => x === child && xs.splice(i, 1))
+      if (xs.length < 1) {
+        delete (this as IParent<T>)[symChildren]
       }
+      delete (child as IChild)[symParent]
+      child.updateParent()
       return this
     }
 
@@ -350,8 +343,11 @@ export function NStructContainerMixin<
     removeChildren(): this {
       const xs = this.children
       if (xs) {
-        xs.clear()
-        delete (this as any)[symChildren]
+        for (const x of xs) {
+          delete (x as IChild)[symParent]
+          x.updateParent()
+        }
+        delete (this as IParent<T>)[symChildren]
       }
       return this
     }
@@ -391,9 +387,7 @@ export function NStructContainerMixin<
   }
 }
 
-export class NStructChild extends NStructChildMixin<Constructor<IBaseClass>>(
-  BaseClass
-) {}
+export class NStructChild extends NStructChildMixin<Constructor<IBaseClass>>(BaseClass) {}
 
 /**
  * This mixin allows you to substitute the necessary type of children
@@ -406,10 +400,8 @@ export function NStructBaseContainerWrapper<
 >(Base: TBase): TBase & INStructContainerConstructor<INStructContainer<T>> {
   return class extends Base {
     readonly [Symbol.iterator]!: () => IterableIterator<T>
-    readonly children!: Set<T>
-    readonly enumChildren!: (
-      visit: NStructChildVisitor<T>
-    ) => NStructVisitorResult
+    readonly children!: Array<T>
+    readonly enumChildren!: (visit: NStructChildVisitor<T>) => NStructVisitorResult
     readonly findChild!: (predicate: (c: T) => boolean) => T | null
     readonly getChildAt!: (index: number) => T | null
   }
