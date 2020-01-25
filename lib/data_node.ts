@@ -253,8 +253,8 @@ export class DataNode
   }
 
   removeChild(child: IDataNode): this {
-    super.removeChild(child)
-    return this.emitEvent(new DataNodeEvent({ child, origin: this, type: 'removeChild' }))
+    this.emitEvent(new DataNodeEvent({ child, origin: this, type: 'removeChild' }))
+    return super.removeChild(child)
   }
 
   setValue(value: DataNodeValue) {

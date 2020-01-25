@@ -4,21 +4,13 @@
  * methods of the NStructContainerMixin can be overridden.
  */
 import { IBitFlags, IConstructor } from '@aperos/ts-goodies'
-import {
-  INStructChild,
-  INStructContainerConstructor,
-  INStructContainer
-} from './n_struct'
+import { INStructChild, INStructContainerConstructor, INStructContainer } from './n_struct'
 import { BaseClassFlags } from './base_class'
 import { IBaseItemContainer, IItem } from './item'
 
-export type ItemContainerFlags =
-  | 'AllowMultiselect'
-  | 'RoundRobin'
-  | BaseClassFlags
+export type ItemContainerFlags = 'AllowMultiselect' | 'RoundRobin' | BaseClassFlags
 
-export interface IItemContainer<T extends IItem = IItem>
-  extends IBaseItemContainer<T> {
+export interface IItemContainer<T extends IItem = IItem> extends IBaseItemContainer<T> {
   roundRobin: boolean
   allowMultiselect: boolean
   readonly itemCount: number
@@ -212,7 +204,9 @@ export function ItemContainerMixin<
     }
 
     removeChild(child: INStructChild): this {
-      this.unselectItem(child as T)
+      if (this.isItemSelected(child as T)) {
+        this.unselectItem(child as T)
+      }
       return super.removeChild(child as T)
     }
 
@@ -257,9 +251,7 @@ export function ItemContainerMixin<
       if (increment !== 0 && n > 0) {
         const index = this.firstSelectedIndex
         this.unselectAll()
-        let nextIndex = this.roundRobin
-          ? (index + n + (increment % n)) % n
-          : index + increment
+        let nextIndex = this.roundRobin ? (index + n + (increment % n)) % n : index + increment
         if (nextIndex >= 0 && nextIndex < n) {
           this.selectItemAt(nextIndex)
         }
