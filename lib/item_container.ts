@@ -61,7 +61,7 @@ export function ItemContainerMixin<
   T extends IItem,
   TBase extends IConstructor<INStructContainer<T>>
 >(Base: TBase): TBase & IItemContainerConstructor<T> {
-  return class ItemContainer extends Base implements IItemContainer<T> {
+  return class MixedItemContainer extends Base implements IItemContainer<T> {
     readonly flags!: IBitFlags<ItemContainerFlags>
 
     /**

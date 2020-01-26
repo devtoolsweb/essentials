@@ -77,7 +77,7 @@ export function isNStructContainer(c?: INStructChild | null): c is INStructConta
 export function NStructChildMixin<TBase extends Constructor<IDisposable>>(
   Base: TBase
 ): TBase & Constructor<INStructChild> {
-  return class NStruct extends Base implements INStructChild, IChild {
+  return class MixedNStructChild extends Base implements INStructChild, IChild {
     /**
      * Returns a hierarchical chain of objects, starting with the root
      * and ending with the current one.
@@ -154,7 +154,7 @@ export function NStructContainerMixin<
   T extends INStructChild = INStructChild,
   TBase extends INStructChildConstructor = INStructChildConstructor
 >(Base: TBase): TBase & INStructContainerConstructor<INStructContainer<T>> {
-  return class NStruct extends Base implements INStructContainer<T>, IParent<T> {
+  return class MixedNStructContainer extends Base implements INStructContainer<T>, IParent<T> {
     /**
      * Collection of child objects.
      */
@@ -394,15 +394,22 @@ export class NStructChild extends NStructChildMixin<Constructor<IBaseClass>>(Bas
  * when the base class is already a container, but with a different
  * type of children.
  */
+// export function NStructBaseContainerWrapper<
+//   T extends INStructChild,
+//   TBase extends INStructContainerConstructor<INStructContainer<INStructChild>>
+// >(Base: TBase): TBase & INStructContainerConstructor<INStructContainer<T>> {
+//   return class extends Base {
+//     readonly [Symbol.iterator]!: () => IterableIterator<T>
+//     readonly children!: Array<T>
+//     readonly enumChildren!: (visit: NStructChildVisitor<T>) => NStructVisitorResult
+//     readonly findChild!: (predicate: (c: T) => boolean) => T | null
+//     readonly getChildAt!: (index: number) => T | null
+//   }
+// }
+
 export function NStructBaseContainerWrapper<
   T extends INStructChild,
   TBase extends INStructContainerConstructor<INStructContainer<INStructChild>>
 >(Base: TBase): TBase & INStructContainerConstructor<INStructContainer<T>> {
-  return class extends Base {
-    readonly [Symbol.iterator]!: () => IterableIterator<T>
-    readonly children!: Array<T>
-    readonly enumChildren!: (visit: NStructChildVisitor<T>) => NStructVisitorResult
-    readonly findChild!: (predicate: (c: T) => boolean) => T | null
-    readonly getChildAt!: (index: number) => T | null
-  }
+  return Base as any
 }

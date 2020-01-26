@@ -1,3 +1,6 @@
+/*
+ * TODO: Remove redundant NStructChild class from class hierarchy.
+ */
 import { IBitFlags } from '@aperos/ts-goodies'
 import {
   EventEmitterConstructor,
