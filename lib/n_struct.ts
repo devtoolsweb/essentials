@@ -3,7 +3,7 @@
  * TODO: use undefined instead of null
  */
 import { Constructor, IDisposable } from '@aperos/ts-goodies'
-import { BaseClass, IBaseClassOpts, IBaseClass } from './base_class'
+import { IBaseClassOpts, IBaseClass } from './base_class'
 
 export interface INStructChild extends IDisposable {
   readonly chain: INStructChild[]
@@ -389,29 +389,19 @@ export function NStructContainerMixin<
   }
 }
 
-export class NStructChild extends NStructChildMixin<Constructor<IBaseClass>>(BaseClass) {}
-
 /**
  * This mixin allows you to substitute the necessary type of children
  * when the base class is already a container, but with a different
  * type of children.
  */
-// export function NStructBaseContainerWrapper<
-//   T extends INStructChild,
-//   TBase extends INStructContainerConstructor<INStructContainer<INStructChild>>
-// >(Base: TBase): TBase & INStructContainerConstructor<INStructContainer<T>> {
-//   return class extends Base {
-//     readonly [Symbol.iterator]!: () => IterableIterator<T>
-//     readonly children!: Array<T>
-//     readonly enumChildren!: (visit: NStructChildVisitor<T>) => NStructVisitorResult
-//     readonly findChild!: (predicate: (c: T) => boolean) => T | null
-//     readonly getChildAt!: (index: number) => T | null
-//   }
-// }
-
 export function NStructBaseContainerWrapper<
   T extends INStructChild,
   TBase extends INStructContainerConstructor<INStructContainer<INStructChild>>
 >(Base: TBase): TBase & INStructContainerConstructor<INStructContainer<T>> {
   return Base as any
 }
+
+export const StandardNStructChild = (
+  base: Constructor<IBaseClass>
+): Constructor<IDisposable> & Constructor<INStructChild> & Constructor<IBaseClass> =>
+  NStructChildMixin<Constructor<IBaseClass>>(base)

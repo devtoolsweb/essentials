@@ -41,7 +41,7 @@ export default [
   },
   {
     input: './build/lib/index.d.ts',
-    output: [{ file: path.join(targetDir, 'test.d.ts'), format: 'es' }],
-    plugins: [pluginDts()]
+    output: [{ file: path.join(targetDir, 'index.d.ts'), format: 'es' }],
+    plugins: [pluginDts({ verbose: true })]
   }
 ]

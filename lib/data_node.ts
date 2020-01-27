@@ -1,5 +1,5 @@
 /*
- * TODO: Remove redundant NStructChild class from class hierarchy.
+ * DONE: Remove redundant NStructChild class from class hierarchy.
  */
 import { IBitFlags, IConstructor } from '@aperos/ts-goodies'
 import {
@@ -8,7 +8,8 @@ import {
   ITypedEvent,
   ITypedEventEmitter,
   ITypedEventOpts,
-  TypedEvent
+  TypedEvent,
+  EventEmitterConstructor
 } from '@aperos/event-emitter'
 import { Constructor } from './types'
 import { BaseClassFlags, IBaseClassOpts, IBaseClass, BaseClass } from './base_class'
@@ -16,9 +17,9 @@ import {
   INStructChild,
   INStructContainer,
   INStructContainerConstructor,
-  NStructChild,
   NStructChildMixin,
-  NStructContainerMixin
+  NStructContainerMixin,
+  INStructChildConstructor
 } from './n_struct'
 
 export type DataNodeCreator = (name: string, pathParts?: string[]) => IDataNode | null
@@ -87,36 +88,48 @@ export class DataNodeEvent extends TypedEvent<IDataNodeEvents> implements IDataN
   }
 }
 
-export interface DataNode {
-  readonly root: IDataNode
-}
-
 export type DataNodeFlags = 'IsEventTrap' | BaseClassFlags
 
-export interface DataNode {
-  readonly flags: IBitFlags<DataNodeFlags>
-  readonly parent: IDataNode | null
-}
+export const MixinDataNodeNStructChild = (
+  base: Constructor<IBaseClass>
+): IConstructor<INStructChild> &
+  INStructChildConstructor<INStructChild> &
+  IConstructor<IBaseClass> => NStructChildMixin<Constructor<IBaseClass>>(base)
 
-export class BaseNStructDataNode extends NStructContainerMixin<
-  IDataNode,
-  Constructor<NStructChild>
->(NStructChild) {}
+export const MixinDataNodeNStructContainer = (
+  base: Constructor<INStructChild & IBaseClass>
+): IConstructor<INStructChild> &
+  INStructContainerConstructor<INStructContainer<IDataNode>> &
+  IConstructor<IBaseClass> =>
+  NStructContainerMixin<IDataNode, Constructor<INStructChild> & Constructor<IBaseClass>>(base)
 
-export const MixinNStructChild = (base: Constructor<IBaseClass>) =>
-  NStructChildMixin<Constructor<IBaseClass>>(base)
-
-export class DataNode
-  extends EventEmitterMixin<
+export const MixinDataNodeEventEmitter = (
+  base: IConstructor<INStructChild> &
+    INStructContainerConstructor<INStructContainer<IDataNode>> &
+    IConstructor<IBaseClass>
+): IConstructor<INStructChild> &
+  INStructContainerConstructor<INStructContainer<IDataNode>> &
+  IConstructor<IBaseClass> &
+  EventEmitterConstructor<ITypedEventEmitter<IDataNodeEvents>> =>
+  EventEmitterMixin<
     IDataNodeEvents,
     IConstructor<INStructChild> &
       INStructContainerConstructor<INStructContainer<IDataNode>> &
       IConstructor<IBaseClass>
-  >(NStructContainerMixin<IDataNode, Constructor<NStructChild>>(MixinNStructChild(BaseClass)))
-  implements IDataNode {
+  >(base)
+
+export const BaseDataNodeConstructor = MixinDataNodeEventEmitter(
+  MixinDataNodeNStructContainer(MixinDataNodeNStructChild(BaseClass))
+)
+
+export class DataNode extends BaseDataNodeConstructor implements IDataNode {
   static readonly pathSeparator = '/'
 
   private static nodeNameRegexp = /^\w[\s\w\-\.#():+_]*$/
+
+  readonly flags!: IBitFlags<DataNodeFlags>
+  readonly root!: IDataNode
+  readonly parent!: IDataNode | null
 
   protected $value: DataNodeValue | IDataNode
 
