@@ -11,6 +11,7 @@
     "jest": "latest",
     "make-dts-bundle": "latest",
     "rollup": "latest",
+    "rollup-plugin-dts": "latest",
     "rollup-plugin-terser": "latest",
     "rollup-plugin-typescript2": "latest",
     "ts-jest": "latest",

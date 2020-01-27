@@ -1,9 +1,8 @@
 /*
  * TODO: Remove redundant NStructChild class from class hierarchy.
  */
-import { IBitFlags } from '@aperos/ts-goodies'
+import { IBitFlags, IConstructor } from '@aperos/ts-goodies'
 import {
-  EventEmitterConstructor,
   EventEmitterMixin,
   IBaseEvents,
   ITypedEvent,
@@ -12,8 +11,15 @@ import {
   TypedEvent
 } from '@aperos/event-emitter'
 import { Constructor } from './types'
-import { BaseClassFlags, IBaseClassOpts, IBaseClass } from './base_class'
-import { INStructChild, INStructContainer, NStructChild, NStructContainerMixin } from './n_struct'
+import { BaseClassFlags, IBaseClassOpts, IBaseClass, BaseClass } from './base_class'
+import {
+  INStructChild,
+  INStructContainer,
+  INStructContainerConstructor,
+  NStructChild,
+  NStructChildMixin,
+  NStructContainerMixin
+} from './n_struct'
 
 export type DataNodeCreator = (name: string, pathParts?: string[]) => IDataNode | null
 
@@ -81,11 +87,6 @@ export class DataNodeEvent extends TypedEvent<IDataNodeEvents> implements IDataN
   }
 }
 
-export class BaseNStructDataNode extends NStructContainerMixin<
-  IDataNode,
-  Constructor<NStructChild>
->(NStructChild) {}
-
 export interface DataNode {
   readonly root: IDataNode
 }
@@ -97,10 +98,21 @@ export interface DataNode {
   readonly parent: IDataNode | null
 }
 
+export class BaseNStructDataNode extends NStructContainerMixin<
+  IDataNode,
+  Constructor<NStructChild>
+>(NStructChild) {}
+
+export const MixinNStructChild = (base: Constructor<IBaseClass>) =>
+  NStructChildMixin<Constructor<IBaseClass>>(base)
+
 export class DataNode
-  extends EventEmitterMixin<IDataNodeEvents, EventEmitterConstructor<BaseNStructDataNode>>(
-    BaseNStructDataNode
-  )
+  extends EventEmitterMixin<
+    IDataNodeEvents,
+    IConstructor<INStructChild> &
+      INStructContainerConstructor<INStructContainer<IDataNode>> &
+      IConstructor<IBaseClass>
+  >(NStructContainerMixin<IDataNode, Constructor<NStructChild>>(MixinNStructChild(BaseClass)))
   implements IDataNode {
   static readonly pathSeparator = '/'
 

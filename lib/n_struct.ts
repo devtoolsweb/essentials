@@ -153,7 +153,9 @@ export function NStructChildMixin<TBase extends Constructor<IDisposable>>(
 export function NStructContainerMixin<
   T extends INStructChild = INStructChild,
   TBase extends INStructChildConstructor = INStructChildConstructor
->(Base: TBase): TBase & INStructContainerConstructor<INStructContainer<T>> {
+>(
+  Base: TBase
+): TBase & INStructContainerConstructor<INStructContainer<T>> & INStructChildConstructor {
   return class MixedNStructContainer extends Base implements INStructContainer<T>, IParent<T> {
     /**
      * Collection of child objects.
