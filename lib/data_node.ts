@@ -1,6 +1,3 @@
-/*
- * DONE: Remove redundant NStructChild class from class hierarchy.
- */
 import { IBitFlags, IConstructor } from '@aperos/ts-goodies'
 import {
   EventEmitterMixin,
