@@ -1,12 +1,12 @@
 import { IBitFlags, IConstructor } from '@aperos/ts-goodies'
 import {
+  EventEmitterConstructor,
   EventEmitterMixin,
   IBaseEvents,
   ITypedEvent,
   ITypedEventEmitter,
   ITypedEventOpts,
   TypedEvent,
-  EventEmitterConstructor
 } from '@aperos/event-emitter'
 import { Constructor } from './types'
 import { BaseClassFlags, IBaseClassOpts, IBaseClass, BaseClass } from './base_class'
@@ -87,33 +87,25 @@ export class DataNodeEvent extends TypedEvent<IDataNodeEvents> implements IDataN
 
 export type DataNodeFlags = 'IsEventTrap' | BaseClassFlags
 
+export type DataNodeNStructChild = IConstructor<INStructChild> & IConstructor<IBaseClass>
+
+export type DataNodeNStructContainer = DataNodeNStructChild &
+  INStructContainerConstructor<INStructContainer<IDataNode>>
+
 export const MixinDataNodeNStructChild = (
   base: Constructor<IBaseClass>
-): IConstructor<INStructChild> &
-  INStructChildConstructor<INStructChild> &
-  IConstructor<IBaseClass> => NStructChildMixin<Constructor<IBaseClass>>(base)
+): DataNodeNStructChild & INStructChildConstructor<INStructChild> =>
+  NStructChildMixin<Constructor<IBaseClass>>(base)
 
 export const MixinDataNodeNStructContainer = (
   base: Constructor<INStructChild & IBaseClass>
-): IConstructor<INStructChild> &
-  INStructContainerConstructor<INStructContainer<IDataNode>> &
-  IConstructor<IBaseClass> =>
+): DataNodeNStructContainer =>
   NStructContainerMixin<IDataNode, Constructor<INStructChild> & Constructor<IBaseClass>>(base)
 
 export const MixinDataNodeEventEmitter = (
-  base: IConstructor<INStructChild> &
-    INStructContainerConstructor<INStructContainer<IDataNode>> &
-    IConstructor<IBaseClass>
-): IConstructor<INStructChild> &
-  INStructContainerConstructor<INStructContainer<IDataNode>> &
-  IConstructor<IBaseClass> &
-  EventEmitterConstructor<ITypedEventEmitter<IDataNodeEvents>> =>
-  EventEmitterMixin<
-    IDataNodeEvents,
-    IConstructor<INStructChild> &
-      INStructContainerConstructor<INStructContainer<IDataNode>> &
-      IConstructor<IBaseClass>
-  >(base)
+  base: DataNodeNStructContainer
+): DataNodeNStructContainer & EventEmitterConstructor<ITypedEventEmitter<IDataNodeEvents>> =>
+  EventEmitterMixin<IDataNodeEvents, DataNodeNStructContainer>(base)
 
 export const BaseDataNodeConstructor = MixinDataNodeEventEmitter(
   MixinDataNodeNStructContainer(MixinDataNodeNStructChild(BaseClass))
