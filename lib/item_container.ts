@@ -52,7 +52,7 @@ const handleItem = (c: IItemContainer, item: IItem, body: () => void) => {
   }
 }
 
-const emptyItems = Object.freeze(new Array<IItem>())
+const emptyItems = Object.freeze(new Set<IItem>())
 
 export interface IItemContainerConstructor<T extends IItem = IItem>
   extends INStructContainerConstructor<IItemContainer<T>> {}
