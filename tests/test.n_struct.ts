@@ -1,10 +1,11 @@
 import { IBitFlags } from '@aperos/ts-goodies'
 import {
+  BaseClass,
   BaseClassFlags,
   INStructChild,
   INStructContainer,
-  NStructChild,
   NStructContainerMixin,
+  StandardNStructChild,
   isNStructContainer
 } from '../lib'
 
@@ -20,7 +21,7 @@ interface TestClass {
   readonly flags: IBitFlags<TestClassFlags>
 }
 
-class TestClass extends NStructContainerMixin(NStructChild)
+class TestClass extends NStructContainerMixin(StandardNStructChild(BaseClass))
   implements ITestClass {
   readonly value = lastValue++
 
@@ -102,14 +103,10 @@ test('find child', () => {
   const parent = makeTree(1, n)
   const fc = parent.firstChild as TestClass
   expect(
-    parent.findChild(
-      (x: INStructChild) => (x as TestClass).value === fc.value + n + 1
-    )
+    parent.findChild((x: INStructChild) => (x as TestClass).value === fc.value + n + 1)
   ).toBeNull()
   expect(
-    parent.findChild(
-      (x: INStructChild) => (x as TestClass).value === fc.value + n / 2
-    )
+    parent.findChild((x: INStructChild) => (x as TestClass).value === fc.value + n / 2)
   ).not.toBeNull()
 })
 
@@ -139,9 +136,7 @@ test('root', () => {
   const fc = parent!.firstChild
   if (isNStructContainer(fc)) {
     expect(fc.isRoot).toBeFalsy()
-    expect(
-      fc.firstChild && fc.firstChild.isContainer ? fc.firstChild.root : null
-    ).toBe(parent)
+    expect(fc.firstChild && fc.firstChild.isContainer ? fc.firstChild.root : null).toBe(parent)
   }
 })
 
