@@ -315,8 +315,8 @@ export function NStructContainerMixin<
         ;(x as IChild)[symMarkForDeletion] = true
         x.dispose()
       }
-      if (this.parent && !(this as IChild)[symMarkForDeletion]) {
-        this.parent.removeChild(this)
+      if (!(this as IChild)[symMarkForDeletion]) {
+        this.unlink()
       }
     }
 

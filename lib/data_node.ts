@@ -6,7 +6,7 @@ import {
   ITypedEvent,
   ITypedEventEmitter,
   ITypedEventOpts,
-  TypedEvent,
+  TypedEvent
 } from '@aperos/event-emitter'
 import { Constructor } from './types'
 import { BaseClassFlags, IBaseClassOpts, IBaseClass, BaseClass } from './base_class'
@@ -168,6 +168,11 @@ export class DataNode extends BaseDataNodeConstructor implements IDataNode {
     }
     this.makePath(path)!.addChild(node)
     return this
+  }
+
+  dispose() {
+    this.removeAllListeners()
+    super.dispose()
   }
 
   findChildNode(name: string): IDataNode | null {
