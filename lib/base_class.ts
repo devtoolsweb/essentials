@@ -34,6 +34,7 @@ export function ClassName(name: string) {
       }
     }
     xs.set(ctor, name)
+    Object.defineProperty(ctor, 'className', { value: name })
     Object.defineProperty(ctor.prototype, 'className', {
       get: function() {
         return xs.get(this.constructor)
@@ -70,9 +71,7 @@ export class BaseClass implements IBaseClass {
 
   set name(value: string) {
     if (this.name) {
-      throw new Error(
-        `The name of descendand class of BaseClass cannot be changed`
-      )
+      throw new Error(`The name of descendand class of BaseClass cannot be changed`)
     }
     ;(this as any)[symName] = value
   }
