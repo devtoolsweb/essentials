@@ -152,8 +152,10 @@ export class DataNode extends BaseDataNodeConstructor implements IDataNode {
   }
 
   set value(value: DataNodeValue) {
-    this.$value = value
-    this.emitEvent(new DataNodeEvent({ origin: this, type: 'change' }))
+    if (this.$value !== value) {
+      this.$value = value
+      this.emitEvent(new DataNodeEvent({ origin: this, type: 'change' }))
+    }
   }
 
   addChild(child: IDataNode): this {
