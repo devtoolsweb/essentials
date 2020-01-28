@@ -26,7 +26,7 @@ class TestClass extends NStructContainerMixin(StandardNStructChild(BaseClass))
   readonly value = lastValue++
 
   toJSON(): object {
-    this.flags.set('Test')
+    this.flags.setFlag('Test')
     return Object.assign(super.toJSON(), { value: this.value })
   }
 }

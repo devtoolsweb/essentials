@@ -53,6 +53,7 @@ export interface IDataNode
   getString(): string
   makePath(path: string, createNode?: DataNodeCreator): IDataNode | null
   removeChild(child: IDataNode): this
+  setEventTrap(value: boolean): this
   setValue(value: DataNodeValue): this
   walkPath(path: string, visit: DataNodeVisitor): IDataNode | null
 }
@@ -125,9 +126,7 @@ export class DataNode extends BaseDataNodeConstructor implements IDataNode {
   constructor(p: IDataNodeOpts) {
     super({ ...p, name: DataNode.verifyName(p.name)! })
     this.$value = p.value === undefined ? null : p.value
-    if (p.isEventTrap) {
-      this.flags.set('IsEventTrap')
-    }
+    p.isEventTrap && this.flags.setFlag('IsEventTrap')
   }
 
   get fullPath(): string {
@@ -277,6 +276,11 @@ export class DataNode extends BaseDataNodeConstructor implements IDataNode {
   removeChild(child: IDataNode): this {
     this.emitEvent(new DataNodeEvent({ child, origin: this, type: 'removeChild' }))
     return super.removeChild(child)
+  }
+
+  setEventTrap(value: boolean): this {
+    this.flags.setFlag('IsEventTrap', value)
+    return this
   }
 
   setValue(value: DataNodeValue) {

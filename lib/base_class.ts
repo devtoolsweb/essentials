@@ -95,7 +95,7 @@ export class BaseClass implements IBaseClass {
   dispose() {}
 
   disable(): this {
-    this.flags.set('IsDisabled')
+    this.flags.setFlag('IsDisabled')
     return this
   }
 
@@ -112,7 +112,7 @@ export class BaseClass implements IBaseClass {
   }
 
   protected announceChanges(): this {
-    this.flags.set('HasChanged')
+    this.flags.setFlag('HasChanged')
     return this
   }
 

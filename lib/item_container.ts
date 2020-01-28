@@ -133,7 +133,7 @@ export function ItemContainerMixin<
     set allowMultiselect(value: boolean) {
       if (this.allowMultiselect === value) {
         if (value) {
-          this.flags.set('AllowMultiselect')
+          this.flags.setFlag('AllowMultiselect')
         } else {
           this.flags.unset('AllowMultiselect')
         }
@@ -151,7 +151,7 @@ export function ItemContainerMixin<
 
     set roundRobin(value: boolean) {
       if (value) {
-        this.flags.set('RoundRobin')
+        this.flags.setFlag('RoundRobin')
       } else {
         this.flags.unset('RoundRobin')
       }
