@@ -55,6 +55,7 @@ export interface IDataNode
   removeChild(child: IDataNode): this
   setEventTrap(value: boolean): this
   setValue(value: DataNodeValue): this
+  toJSON(): object
   walkPath(path: string, visit: DataNodeVisitor): IDataNode | null
 }
 
@@ -111,6 +112,8 @@ export const MixinDataNodeEventEmitter = (
 export const BaseDataNodeConstructor = MixinDataNodeEventEmitter(
   MixinDataNodeNStructContainer(MixinDataNodeNStructChild(BaseClass))
 )
+
+type DataNodeJson = Record<string, DataNodeValue | object>
 
 export class DataNode extends BaseDataNodeConstructor implements IDataNode {
   static readonly pathSeparator = '/'
@@ -288,6 +291,21 @@ export class DataNode extends BaseDataNodeConstructor implements IDataNode {
   setValue(value: DataNodeValue) {
     this.value = value
     return this
+  }
+
+  toJSON() {
+    const { childCount: cc, name, value } = this
+    const json: DataNodeJson = {}
+    if (cc) {
+      const node: DataNodeJson = { ...(value !== null ? { '@value': value } : {}) }
+      this.enumChildren(c => {
+        node[c.name] = (c.toJSON() as DataNodeJson)[c.name]
+      })
+      json[name] = node
+    } else {
+      json[name] = this.value
+    }
+    return json
   }
 
   toString(): string {

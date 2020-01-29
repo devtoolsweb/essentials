@@ -1,10 +1,4 @@
-import {
-  DataNode,
-  DataNodeCreator,
-  DataNodeValue,
-  DataNodeVisitor,
-  IDataNode
-} from './data_node'
+import { DataNode, DataNodeCreator, DataNodeValue, DataNodeVisitor, IDataNode } from './data_node'
 import { IBaseClassOpts } from './base_class'
 
 export interface IDataNodeLink extends IDataNode {
@@ -17,7 +11,7 @@ export interface IDataNodeLinkOpts extends IBaseClassOpts {
 }
 
 export class DataNodeLink extends DataNode implements IDataNodeLink {
-  constructor (p: IDataNodeLinkOpts) {
+  constructor(p: IDataNodeLinkOpts) {
     let t: IDataNode | null = p.target
     const path = p.targetPath
     if (path) {
@@ -30,74 +24,80 @@ export class DataNodeLink extends DataNode implements IDataNodeLink {
     this.$value = t
   }
 
-  get isLink (): boolean {
+  get isLink(): boolean {
     return true
   }
 
-  get realPath (): string {
+  get realPath(): string {
     return this.target.fullPath
   }
 
-  get target (): IDataNode {
+  get target(): IDataNode {
     return this.$value as IDataNode
   }
 
-  get value (): DataNodeValue {
+  get value(): DataNodeValue {
     return this.target.value
   }
 
-  set value (v: DataNodeValue) {
+  set value(v: DataNodeValue) {
     this.target.value = v
   }
 
-  addChild (child: IDataNode): this {
+  addChild(child: IDataNode): this {
     this.target.addChild(child)
     return this
   }
 
-  addSuccessorNode (path: string, node: IDataNode): this {
+  addSuccessorNode(path: string, node: IDataNode): this {
     this.target.addSuccessorNode(path, node)
     return this
   }
 
-  findChildNode (name: string): IDataNode | null {
+  findChildNode(name: string): IDataNode | null {
     return this.target.findChildNode(name)
   }
 
-  getBoolean (): boolean {
+  getBoolean(): boolean {
     return this.target.getBoolean()
   }
 
-  getDate (): Date {
+  getDate(): Date {
     return this.target.getDate()
   }
 
-  getFloat (): number {
+  getFloat(): number {
     return this.target.getFloat()
   }
 
-  getInt (): number {
+  getInt(): number {
     return this.target.getInt()
   }
 
-  getNodeByPath (path: string): IDataNode | null {
+  getNodeByPath(path: string): IDataNode | null {
     return this.target.getNodeByPath(path)
   }
 
-  getString (): string {
+  getString(): string {
     return this.target.getString()
   }
 
-  makePath (path: string, createNode?: DataNodeCreator): IDataNode | null {
+  makePath(path: string, createNode?: DataNodeCreator): IDataNode | null {
     return this.target.makePath(path, createNode)
   }
 
-  removeChild (child: IDataNode): this {
+  removeChild(child: IDataNode): this {
     this.target.removeChild(child)
     return this
   }
 
-  walkPath (path: string, visit: DataNodeVisitor): IDataNode | null {
+  toJSON() {
+    const json: Record<string, string> = {}
+    json[this.name] = `@link:${this.realPath}`
+    return json
+  }
+
+  walkPath(path: string, visit: DataNodeVisitor): IDataNode | null {
     return this.target.walkPath(path, visit)
   }
 }
