@@ -26,9 +26,7 @@ export class DataNodeBuilder implements IDataNodeBuilder {
 
   private createChildren(dn: IDataNode, nodeObjects: object) {
     Object.entries(nodeObjects).forEach(([key, value]) => {
-      const name = this.camelCaseToKebab
-        ? StringUtils.camelCaseToKebab(key)
-        : key
+      const name = this.camelCaseToKebab ? StringUtils.camelCaseToKebab(key) : key
       if (name === 'default' || this.addProperty(dn, name, value)) {
         return
       }
@@ -90,14 +88,17 @@ export class DataNodeBuilder implements IDataNodeBuilder {
 
   private createDate(name: string, value: string): IDataNode | null {
     const m = value.match(/^@date:\s*(.*)$/)
-    return m ? new DataNode({ name, value: new Date(m[1]) }) : null
+    if (m) {
+      const timestamp = Date.parse(m[1])
+      if (isNaN(timestamp)) {
+        throw new Error(`Invalid date string: ${m[1]}`)
+      }
+      new DataNode({ name, value: new Date(timestamp) })
+    }
+    return null
   }
 
-  private createLink(
-    dn: IDataNode,
-    name: string,
-    value: string
-  ): IDataNode | null {
+  private createLink(dn: IDataNode, name: string, value: string): IDataNode | null {
     const m = value.match(/^@link:\s*(.*)$/)
     if (m) {
       const path = m[1]

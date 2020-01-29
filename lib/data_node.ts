@@ -296,14 +296,15 @@ export class DataNode extends BaseDataNodeConstructor implements IDataNode {
   toJSON() {
     const { childCount: cc, name, value } = this
     const json: DataNodeJson = {}
+    const v = value instanceof Date ? `@date:${value.toISOString()}` : value
     if (cc) {
-      const node: DataNodeJson = { ...(value !== null ? { '@value': value } : {}) }
+      const node: DataNodeJson = { ...(value !== null ? { '@value': v } : {}) }
       this.enumChildren(c => {
         node[c.name] = (c.toJSON() as DataNodeJson)[c.name]
       })
       json[name] = node
     } else {
-      json[name] = this.value
+      json[name] = v
     }
     return json
   }
