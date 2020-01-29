@@ -1,5 +1,13 @@
-import { DataNode, DataNodeCreator, DataNodeValue, DataNodeVisitor, IDataNode } from './data_node'
+import {
+  DataNode,
+  DataNodeCreator,
+  DataNodeValue,
+  DataNodeVisitor,
+  IDataNode,
+  IDataNodeEvents
+} from './data_node'
 import { IBaseClassOpts } from './base_class'
+import { EventEmitArgs } from '@aperos/event-emitter'
 
 export interface IDataNodeLink extends IDataNode {
   readonly target: IDataNode
@@ -49,9 +57,22 @@ export class DataNodeLink extends DataNode implements IDataNodeLink {
     return this
   }
 
+  addListener<E extends keyof IDataNodeEvents>(
+    event: E,
+    listener: IDataNodeEvents[E],
+    counter: number = Infinity
+  ) {
+    this.target.addListener(event, listener, counter)
+    return this
+  }
+
   addSuccessorNode(path: string, node: IDataNode): this {
     this.target.addSuccessorNode(path, node)
     return this
+  }
+
+  emit<E extends keyof IDataNodeEvents>(event: E, ...args: EventEmitArgs<IDataNodeEvents[E]>) {
+    return this.target.emit(event, ...args)
   }
 
   findChildNode(name: string): IDataNode | null {
@@ -82,12 +103,30 @@ export class DataNodeLink extends DataNode implements IDataNodeLink {
     return this.target.getString()
   }
 
+  listenerCount<E extends keyof IDataNodeEvents>(event: E) {
+    return this.target.listenerCount(event)
+  }
+
+  listeners<E extends keyof IDataNodeEvents>(event: E) {
+    return this.target.listeners(event)
+  }
+
   makePath(path: string, createNode?: DataNodeCreator): IDataNode | null {
     return this.target.makePath(path, createNode)
   }
 
   removeChild(child: IDataNode): this {
     this.target.removeChild(child)
+    return this
+  }
+
+  removeAllListeners<E extends keyof IDataNodeEvents>(event?: E) {
+    this.target.removeAllListeners(event)
+    return this
+  }
+
+  removeListener<E extends keyof IDataNodeEvents>(event: E, listener: IDataNodeEvents[E]) {
+    this.target.removeListener(event, listener)
     return this
   }
 
