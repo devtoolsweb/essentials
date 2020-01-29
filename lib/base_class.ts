@@ -23,7 +23,7 @@ export interface IBaseClassConstructor {
 
 export type BaseClassConstructor = new (p?: IBaseClassOpts) => IBaseClass
 
-export type BaseClassFlags = 'HasChanged' | 'IsDisabled'
+export type BaseClassFlags = 'HasChanged' | 'IsDisabled' | 'IsDisposing'
 
 export function ClassName(name: string) {
   return function(ctor: Function) {
@@ -91,7 +91,9 @@ export class BaseClass implements IBaseClass {
     return this
   }
 
-  dispose() {}
+  dispose() {
+    this.flags.setFlag('IsDisposing')
+  }
 
   disable(): this {
     this.flags.setFlag('IsDisabled')
