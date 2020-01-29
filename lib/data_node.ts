@@ -177,8 +177,10 @@ export class DataNode extends BaseDataNodeConstructor implements IDataNode {
   }
 
   dispose() {
-    this.removeAllListeners()
     super.dispose()
+    if (this.isRoot) {
+      this.removeAllListeners()
+    }
   }
 
   findChildNode(name: string): IDataNode | null {
