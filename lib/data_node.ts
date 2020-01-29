@@ -135,8 +135,9 @@ export class DataNode extends BaseDataNodeConstructor implements IDataNode {
 
   get fullPath(): string {
     const s = DataNode.pathSeparator
-    const p = this.chain.map((x: INStructChild) => (x as IDataNode).name).join(s)
-    return `${s}${p}`
+    const p = this.chain.map(x => (x as IDataNode).name)
+    p.shift()
+    return `${s}${p.join(s)}`
   }
 
   get isEventTrap() {
