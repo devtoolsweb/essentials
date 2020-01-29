@@ -50,6 +50,7 @@ export interface IDataNode
   getFloat(): number
   getInt(): number
   getNodeByPath(path: string): IDataNode | null
+  getRelativePath(node: IDataNode, target: IDataNode): string
   getString(): string
   makePath(path: string, createNode?: DataNodeCreator): IDataNode | null
   removeChild(child: IDataNode): this
@@ -232,6 +233,15 @@ export class DataNode extends BaseDataNodeConstructor implements IDataNode {
 
   getInt(): number {
     return Math.trunc(this.getFloat())
+  }
+
+  getRelativePath(node: IDataNode, target: IDataNode): string {
+    if (node.root !== target.root) {
+      throw new Error(
+        `Date nodes must belong to one tree: '${node.fullPath}', '${target.fullPath}'`
+      )
+    }
+    throw new Error('Not implemented')
   }
 
   getString(): string {
