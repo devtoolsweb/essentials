@@ -90,8 +90,8 @@ export class DataNodeBuilder implements IDataNodeBuilder {
   private createDate(name: string, value: string): IDataNode | null {
     const m = value.match(/^@date:\s*(.*)$/)
     if (m) {
-      const timestamp = Date.parse(m[1])
-      if (isNaN(timestamp)) {
+      const timestamp = new Date(m[1])
+      if (isNaN(timestamp.valueOf())) {
         throw new Error(`Invalid date string: ${m[1]}`)
       }
       new DataNode({ name, value: new Date(timestamp) })
