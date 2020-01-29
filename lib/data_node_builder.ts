@@ -19,6 +19,7 @@ export class DataNodeBuilder implements IDataNodeBuilder {
   }
 
   build(source: object, rootNodeName?: string) {
+    this.identifiedNodes.clear()
     const root = new DataNode({ name: rootNodeName || 'data' })
     this.createChildren(root, source)
     return root
