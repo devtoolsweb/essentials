@@ -47,6 +47,7 @@ export interface IDataNode
   findChildNode(name: string): IDataNode | null
   getBoolean(): boolean
   getDate(): Date
+  getExistingNode(path: string): IDataNode
   getFloat(): number
   getInt(): number
   getNodeByPath(path: string): IDataNode | null
@@ -217,6 +218,14 @@ export class DataNode extends BaseDataNodeConstructor implements IDataNode {
     }
   }
 
+  getExistingNode(path: string) {
+    const dn = this.getNodeByPath(path)
+    if (!dn) {
+      throw new Error(`Data node '${this.fullPath}' has no child in the path '${path}'`)
+    }
+    return dn
+  }
+
   getFloat(): number {
     let v = this.$value
     if (typeof v === 'number') {
@@ -238,6 +247,14 @@ export class DataNode extends BaseDataNodeConstructor implements IDataNode {
     return Math.trunc(this.getFloat())
   }
 
+  getNodeByPath(path: string): IDataNode | null {
+    try {
+      return this.walkPath(path, x => x)
+    } catch (e) {
+      return null
+    }
+  }
+
   getRelativePath(node: IDataNode, target: IDataNode): string {
     if (node.root !== target.root) {
       throw new Error(
@@ -253,14 +270,6 @@ export class DataNode extends BaseDataNodeConstructor implements IDataNode {
       throw new Error('Cannot convert null to string')
     } else {
       return d.toString()
-    }
-  }
-
-  getNodeByPath(path: string): IDataNode | null {
-    try {
-      return this.walkPath(path, x => x)
-    } catch (e) {
-      return null
     }
   }
 
