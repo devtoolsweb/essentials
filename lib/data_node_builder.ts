@@ -1,3 +1,9 @@
+/*
+ * TODO: Add support for docs an cross-references.
+ * Documents can be represented using the option of the type of object,
+ * the keys of which are the names of documents, and the values are
+ * trees of nodes.
+ */
 import { DataNode, IDataNode } from './data_node'
 import { DataNodeLink } from './data_node_link'
 import { StringUtils, Memoize } from '@aperos/ts-goodies'
