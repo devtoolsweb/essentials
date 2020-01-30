@@ -32,6 +32,10 @@ export class DataNodeLink extends DataNode implements IDataNodeLink {
     this.$value = t
   }
 
+  [Symbol.iterator]() {
+    return this.target[Symbol.iterator]()
+  }
+
   get isLink(): boolean {
     return true
   }
