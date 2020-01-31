@@ -14,10 +14,12 @@ export interface IDataNodeBuilderOpts {
 
 export interface IDataNodeBuilder {
   build(source: object, rootNodeName?: string): IDataNode
+  getLastIdentifiedPaths(): Map<string, string>
 }
 
 export class DataNodeBuilder implements IDataNodeBuilder {
-  protected readonly identifiedNodes = new Map<string, IDataNode>()
+  readonly identifiedNodes = new Map<string, IDataNode>()
+
   protected readonly camelCaseToKebab: boolean
 
   constructor(opts?: IDataNodeBuilderOpts) {
@@ -29,6 +31,14 @@ export class DataNodeBuilder implements IDataNodeBuilder {
     const root = new DataNode({ name: rootNodeName || 'data' })
     this.createChildren(root, source)
     return root
+  }
+
+  getLastIdentifiedPaths() {
+    const m = new Map<string, string>()
+    for (const [id, node] of this.identifiedNodes.entries()) {
+      m.set(id, node.fullPath)
+    }
+    return m
   }
 
   private createChildren(dn: IDataNode, nodeObjects: object) {
