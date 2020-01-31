@@ -119,12 +119,19 @@ export class DataNodeBuilder implements IDataNodeBuilder {
   }
 
   private createRef(name: string, value: string): IDataNode | null {
-    const m = value.match(/^@ref:\s*(.*)$/)
+    const m = value.match(/^@ref:\s*([^:]+)(?::\/(.*))?$/)
     if (m) {
-      const id = m[1]
-      const target = this.identifiedNodes.get(m[1])
+      const [, id, path] = m
+      let target = this.identifiedNodes.get(id)
       if (!target) {
         throw new Error(`Node with id '${id}' does not exist`)
+      }
+      if (path) {
+        const c = target.getNodeByPath(path)
+        if (!c) {
+          throw new Error(`Child node '${path}' of node '${target.fullPath}' does not exist`)
+        }
+        target = c
       }
       return new DataNodeLink({ name, target })
     }
