@@ -14,10 +14,12 @@ export interface IDataNodeBuilderOpts {
 
 export interface IDataNodeBuilder {
   build(source: object, rootNodeName?: string): IDataNode
-  getLastIdentifiedPaths(): Map<string, string>
+  getLastIdentifiedPaths(): Record<string, string>
 }
 
 export class DataNodeBuilder implements IDataNodeBuilder {
+  static readonly regexpNodeRef = /^@ref:\s*([^:]+)(?::\/(.*))?$/
+
   readonly identifiedNodes = new Map<string, IDataNode>()
 
   protected readonly camelCaseToKebab: boolean
@@ -34,11 +36,11 @@ export class DataNodeBuilder implements IDataNodeBuilder {
   }
 
   getLastIdentifiedPaths() {
-    const m = new Map<string, string>()
+    const xs: Record<string, string> = {}
     for (const [id, node] of this.identifiedNodes.entries()) {
-      m.set(id, node.fullPath)
+      xs[id] = node.fullPath
     }
-    return m
+    return xs
   }
 
   private createChildren(dn: IDataNode, nodeObjects: object) {
@@ -129,7 +131,7 @@ export class DataNodeBuilder implements IDataNodeBuilder {
   }
 
   private createRef(name: string, value: string): IDataNode | null {
-    const m = value.match(/^@ref:\s*([^:]+)(?::\/(.*))?$/)
+    const m = value.match(DataNodeBuilder.regexpNodeRef)
     if (m) {
       const [, id, path] = m
       let target = this.identifiedNodes.get(id)
