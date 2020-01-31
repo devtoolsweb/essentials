@@ -1,5 +1,5 @@
 /*
- * TODO: Add support for docs an cross-references.
+ * TODO: Add support for docs and cross-references.
  * Documents can be represented using the option of the type of object,
  * the keys of which are the names of documents, and the values are
  * trees of nodes.
