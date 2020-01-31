@@ -1,4 +1,4 @@
-import { IBitFlags, IConstructor } from '@aperos/ts-goodies'
+import { Constructor, IBitFlags } from '@aperos/ts-goodies'
 import {
   EventEmitterConstructor,
   EventEmitterMixin,
@@ -8,7 +8,6 @@ import {
   ITypedEventOpts,
   TypedEvent
 } from '@aperos/event-emitter'
-import { Constructor } from './types'
 import { BaseClassFlags, IBaseClassOpts, IBaseClass, BaseClass } from './base_class'
 import {
   INStructChild,
@@ -91,9 +90,9 @@ export class DataNodeEvent extends TypedEvent<IDataNodeEvents> implements IDataN
 
 export type DataNodeFlags = 'IsEventTrap' | BaseClassFlags
 
-export type DataNodeNStructChild = IConstructor<INStructChild> & IConstructor<IBaseClass>
+export type DataNodeNStructChild = Constructor<INStructChild> & Constructor<IBaseClass>
 
-export type DataNodeNStructContainer = DataNodeNStructChild &
+  export type DataNodeNStructContainer = DataNodeNStructChild &
   INStructContainerConstructor<INStructContainer<IDataNode>>
 
 export const MixinDataNodeNStructChild = (
