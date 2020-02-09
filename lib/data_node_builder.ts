@@ -50,24 +50,31 @@ export class DataNodeBuilder implements IDataNodeBuilder {
         return
       }
       DataNode.verifyName(name)
-      const t = typeof value
-      switch (t) {
-        case 'object':
-          this.createChildren(this.addChildNode(dn, name), value)
-          break
+      if (Array.isArray(value)) {
+        const node = this.addChildNode(dn, name)
+        const xs: Record<string, object> = {}
+        value.forEach((v, i) => (xs[`${i}`] = v))
+        this.createChildren(node, xs)
+      } else {
+        const t = typeof value
+        switch (t) {
+          case 'object':
+            this.createChildren(this.addChildNode(dn, name), value)
+            break
 
-        case 'string':
-          dn.addChild(
-            this.createDate(name, value) ||
-              this.createLink(dn, name, value) ||
-              this.createRef(name, value) ||
-              this.createTimestamp(name, value) ||
-              new DataNode({ name, value })
-          )
-          break
+          case 'string':
+            dn.addChild(
+              this.createDate(name, value) ||
+                this.createLink(dn, name, value) ||
+                this.createRef(name, value) ||
+                this.createTimestamp(name, value) ||
+                new DataNode({ name, value })
+            )
+            break
 
-        default:
-          this.addValue(this.addChildNode(dn, name), value)
+          default:
+            this.addValue(this.addChildNode(dn, name), value)
+        }
       }
     })
   }

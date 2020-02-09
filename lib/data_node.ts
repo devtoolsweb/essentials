@@ -88,11 +88,11 @@ export class DataNodeEvent extends TypedEvent<IDataNodeEvents> implements IDataN
   }
 }
 
-export type DataNodeFlags = 'IsEventTrap' | BaseClassFlags
+export type DataNodeFlags = 'IsChanging' | 'IsEventTrap' | BaseClassFlags
 
 export type DataNodeNStructChild = Constructor<INStructChild> & Constructor<IBaseClass>
 
-  export type DataNodeNStructContainer = DataNodeNStructChild &
+export type DataNodeNStructContainer = DataNodeNStructChild &
   INStructContainerConstructor<INStructContainer<IDataNode>>
 
 export const MixinDataNodeNStructChild = (
@@ -138,6 +138,10 @@ export class DataNode extends BaseDataNodeConstructor implements IDataNode {
     const p = this.chain.map(x => (x as IDataNode).name)
     p.shift()
     return `${s}${p.join(s)}`
+  }
+
+  get isChanging() {
+    return this.flags.isSet('IsChanging')
   }
 
   get isEventTrap() {
@@ -394,15 +398,19 @@ export class DataNode extends BaseDataNodeConstructor implements IDataNode {
   }
 
   protected emitEvent(event: IDataNodeEvent): this {
-    let p = this.parent
-    while (p) {
-      const dn = p as IDataNode
-      if (dn.isEventTrap) {
-        dn.emit(event.type, event)
+    if (!this.isChanging || event.type !== 'change') {
+      this.flags.setFlag('IsChanging')
+      let p = this.parent
+      while (p) {
+        const dn = p as IDataNode
+        if (dn.isEventTrap) {
+          dn.emit(event.type, event)
+        }
+        p = p.parent
       }
-      p = p.parent
+      super.emit(event.type, event)
+      this.flags.unset('IsChanging')
     }
-    super.emit(event.type, event)
     return this
   }
 
