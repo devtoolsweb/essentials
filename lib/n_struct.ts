@@ -27,7 +27,7 @@ export type NStructChildVisitor<T extends INStructChild> = (
 export interface INStructContainer<T extends INStructChild = INStructChild> extends INStructChild {
   readonly childCount: number
   readonly children: Array<T> | null
-  readonly firstChild: INStructChild | null
+  readonly firstChild: T | null
   readonly hasChildren: boolean
   readonly isLeaf: boolean
   readonly isRoot: boolean
@@ -172,7 +172,7 @@ export function NStructContainerMixin<
      * Returns the first item from the collection of child objects,
      * or null if the collection is empty.
      */
-    get firstChild(): T | null {
+    get firstChild() {
       return this.children ? this.children[0] : null
     }
 
