@@ -7,9 +7,11 @@ export interface IBaseClass extends IDisposable {
   name: string
   readonly className: string
   readonly isEnabled: boolean
+  readonly isUpdating: boolean
   copyFrom(source: IBaseClass): this
   disable(): this
   enable(): this
+  performUpdates(update: () => void): this
   toJSON(): object
 }
 
@@ -23,7 +25,7 @@ export interface IBaseClassConstructor {
 
 export type BaseClassConstructor = new (p?: IBaseClassOpts) => IBaseClass
 
-export type BaseClassFlags = 'HasChanged' | 'IsDisabled' | 'IsDisposing'
+export type BaseClassFlags = 'HasChanged' | 'IsDisabled' | 'IsDisposing' | 'IsUpdating'
 
 export function ClassName(name: string) {
   return function(ctor: Function) {
@@ -65,6 +67,10 @@ export class BaseClass implements IBaseClass {
     return !this.flags.isSet('IsDisabled')
   }
 
+  get isUpdating() {
+    return this.flags.isSet('IsUpdating')
+  }
+
   get name(): string {
     return (this as any)[symName]
   }
@@ -102,6 +108,16 @@ export class BaseClass implements IBaseClass {
 
   enable(): this {
     this.flags.unset('IsDisabled')
+    return this
+  }
+
+  performUpdates(update: () => void) {
+    const { flags: f, isUpdating: u } = this
+    if (!u) {
+      f.setFlag('IsUpdating')
+      update()
+      f.unset('IsUpdating')
+    }
     return this
   }
 
