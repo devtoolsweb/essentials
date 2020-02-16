@@ -6,7 +6,16 @@ import { Constructor, IDisposable } from '@aperos/ts-goodies'
 import { IBaseClassOpts, IBaseClass } from './base_class'
 
 export interface INStructChild extends IDisposable {
+  /**
+   * @returns a hierarchical chain of objects, starting with the root
+   * and ending with the current one.
+   */
   readonly chain: INStructChild[]
+  /**
+   * @returns the current index of the object in the collection of child
+   * objects of the parent object, or -1 if the object does not
+   * have a parent object.
+   */
   readonly childIndex: number
   readonly isContainer: boolean
   readonly level: number
@@ -14,6 +23,9 @@ export interface INStructChild extends IDisposable {
   readonly root: INStructContainer | null
   hasAncestor(s: INStructContainer): boolean
   unlink(): this
+  /**
+   * Fires when a node changes the parent node.
+   */
   updateParent(): void
 }
 
@@ -26,21 +38,55 @@ export type NStructChildVisitor<T extends INStructChild> = (
 
 export interface INStructContainer<T extends INStructChild = INStructChild> extends INStructChild {
   readonly childCount: number
+  /**
+   * @returns Collection of child objects.
+   */
   readonly children: Array<T> | null
+  /**
+   * @returns First item from the collection of child objects,
+   * or null if the collection is empty.
+   */
   readonly firstChild: T | null
   readonly hasChildren: boolean
   readonly isLeaf: boolean
   readonly isRoot: boolean
   readonly root: INStructContainer | null
   [Symbol.iterator](): IterableIterator<T>
+  /**
+   * Adds an object to the collection of child objects.
+   * Addition occurs at the end of the collection.
+   */
   addChild(child: T): this
   addChildren(...list: T[]): this
   enumChildren(visit: NStructChildVisitor<T>): NStructVisitorResult
   findChild(predicate: (c: T) => boolean): T | null
+  /**
+   * Returns an object at the specified index in the collection of child objects.
+   */
   getChildAt(index: number): T | null
+  insertChild(child: T, index?: number): this
+  /**
+   * Recursively releases NStruct with the entire subtree.
+   */
   releaseTree(): void
+  /**
+   * Removes an existing object from the collection of child objects.
+   * It does not release the object after removal.
+   */
   removeChild(child: T): this
+  /**
+   * Removes all immediate descendants of a node.
+   * NOTE: This method doesn't recursively remove descendants.
+   */
   removeChildren(): this
+  /**
+   * Performs a complete traversal of the hierarchy of objects,
+   * invoking the target function on each object.
+   * The traversal is immediately terminated if the function returns "false".
+   * @param visit - Target function
+   * @param downwards - If true, first visit the current node,
+   * then visit the children.
+   */
   traverseTree(
     visit: (x: INStructChild) => NStructVisitorResult,
     downwards?: boolean
@@ -78,10 +124,6 @@ export function NStructChildMixin<TBase extends Constructor<IDisposable>>(
   Base: TBase
 ): TBase & Constructor<INStructChild> {
   return class MixedNStructChild extends Base implements INStructChild, IChild {
-    /**
-     * Returns a hierarchical chain of objects, starting with the root
-     * and ending with the current one.
-     */
     get chain(): INStructChild[] {
       const a = []
       let p: INStructChild | null = this
@@ -92,12 +134,7 @@ export function NStructChildMixin<TBase extends Constructor<IDisposable>>(
       return a
     }
 
-    /**
-     * Returns the current index of the object in the collection of child
-     * objects of the parent object, or -1 if the object does not
-     * have a parent object.
-     */
-    get childIndex(): number {
+    get childIndex() {
       let i = 0
       for (let c of this.parent || []) {
         if (c === this) {
@@ -108,7 +145,7 @@ export function NStructChildMixin<TBase extends Constructor<IDisposable>>(
       return -1
     }
 
-    get isContainer(): boolean {
+    get isContainer() {
       return false
     }
 
@@ -121,11 +158,11 @@ export function NStructChildMixin<TBase extends Constructor<IDisposable>>(
       return p ? (p as INStructContainer) : null
     }
 
-    get root(): INStructContainer | null {
+    get root() {
       return this.parent ? this.parent.root : null
     }
 
-    hasAncestor(s: INStructContainer): boolean {
+    hasAncestor(s: INStructContainer) {
       let x: INStructContainer | null = this.parent
       while (x) {
         if (x === s) {
@@ -136,16 +173,13 @@ export function NStructChildMixin<TBase extends Constructor<IDisposable>>(
       return false
     }
 
-    unlink(): this {
+    unlink() {
       if (this.parent) {
         this.parent.removeChild(this)
       }
       return this
     }
 
-    /**
-     * Fires when a node changes the parent node.
-     */
     updateParent() {}
   }
 }
@@ -157,42 +191,35 @@ export function NStructContainerMixin<
   Base: TBase
 ): TBase & INStructContainerConstructor<INStructContainer<T>> & INStructChildConstructor {
   return class MixedNStructContainer extends Base implements INStructContainer<T>, IParent<T> {
-    /**
-     * Collection of child objects.
-     */
     get children(): Array<T> | null {
       return (this as IParent<T>)[symChildren] || null
     }
 
-    get childCount(): number {
+    get childCount() {
       return this.children ? this.children.length : 0
     }
 
-    /**
-     * Returns the first item from the collection of child objects,
-     * or null if the collection is empty.
-     */
     get firstChild() {
       return this.children ? this.children[0] : null
     }
 
-    get hasChildren(): boolean {
+    get hasChildren() {
       return this.childCount > 0
     }
 
-    get isContainer(): boolean {
+    get isContainer() {
       return true
     }
 
-    get isLeaf(): boolean {
+    get isLeaf() {
       return !this.isRoot && !this.hasChildren
     }
 
-    get isRoot(): boolean {
+    get isRoot() {
       return !!this.parent === false
     }
 
-    /**
+    /*
      * WARNING: Don't remove null from the result type.
      * The container property interface must match the interface
      * of the corresponding item property.
@@ -215,11 +242,58 @@ export function NStructContainerMixin<
       return this.iterator()
     }
 
+    addChild(child: T) {
+      return this.insertChild(child)
+    }
+
+    addChildren(...list: T[]) {
+      list.forEach(c => this.addChild(c))
+      return this
+    }
+
+    dispose() {
+      this.releaseTree()
+      super.dispose()
+    }
+
     /**
-     * Adds an object to the collection of child objects.
-     * Addition always occurs at the end of the collection.
+     * WARNING: You cannot add or remove children while enumerating.
      */
-    addChild(child: T): this {
+    enumChildren(visit: NStructChildVisitor<T>): NStructVisitorResult {
+      const xs = this.children
+      if (xs) {
+        let i = 0
+        for (const x of xs) {
+          const result = visit(x, i++)
+          if (result && result !== 'Omit') {
+            return result
+          }
+        }
+      }
+    }
+
+    findChild(predicate: (c: T) => boolean) {
+      let child = null
+      this.enumChildren(
+        (c: T): NStructVisitorResult => {
+          if (predicate(c)) {
+            child = c
+            return 'Leave'
+          }
+        }
+      )
+      return child
+    }
+
+    getChildAt(index: number) {
+      const xs = this.children
+      if (xs && index >= 0 && index < xs.length) {
+        return xs[index]
+      }
+      return null
+    }
+
+    insertChild(child: T, index?: number) {
       let p = child.parent
       if (p) {
         if (p === this) {
@@ -247,56 +321,6 @@ export function NStructContainerMixin<
       return this
     }
 
-    addChildren(...list: T[]): this {
-      list.forEach(c => this.addChild(c))
-      return this
-    }
-
-    dispose() {
-      this.releaseTree()
-      super.dispose()
-    }
-
-    /**
-     * WARNING: You cannot add or remove children while enumerating.
-     */
-    enumChildren(visit: NStructChildVisitor<T>): NStructVisitorResult {
-      const xs = this.children
-      if (xs) {
-        let i = 0
-        for (const x of xs) {
-          const result = visit(x, i++)
-          if (result && result !== 'Omit') {
-            return result
-          }
-        }
-      }
-    }
-
-    findChild(predicate: (c: T) => boolean): T | null {
-      let child = null
-      this.enumChildren(
-        (c: T): NStructVisitorResult => {
-          if (predicate(c)) {
-            child = c
-            return 'Leave'
-          }
-        }
-      )
-      return child
-    }
-
-    /**
-     * Returns an object at the specified index in the collection of child objects.
-     */
-    getChildAt(index: number): T | null {
-      const xs = this.children
-      if (xs && index >= 0 && index < xs.length) {
-        return xs[index]
-      }
-      return null
-    }
-
     /**
      * This method is part of the implementation of the IterableIterator interface.
      */
@@ -304,9 +328,6 @@ export function NStructContainerMixin<
       return { done: true, value: undefined! }
     }
 
-    /**
-     * Recursively releases NStruct with the entire subtree.
-     */
     releaseTree(): void {
       const xs = Array.from(this.children || [])
       while (xs.length > 0) {
@@ -320,10 +341,6 @@ export function NStructContainerMixin<
       }
     }
 
-    /**
-     * Removes an existing object from the collection of child objects.
-     * It does not release the object after removal.
-     */
     removeChild(child: T): this {
       if (child.parent !== this) {
         throw new Error('Child node is not owned by object')
@@ -338,11 +355,7 @@ export function NStructContainerMixin<
       return this
     }
 
-    /**
-     * Removes all immediate descendants of a node.
-     * NOTE: This method doesn't recursively remove descendants.
-     */
-    removeChildren(): this {
+    removeChildren() {
       const xs = this.children
       if (xs) {
         for (const x of xs) {
@@ -354,13 +367,6 @@ export function NStructContainerMixin<
       return this
     }
 
-    /**
-     * Performs a complete traversal of the hierarchy of objects,
-     * invoking the "visit" function on each object.
-     * The traversal is immediately terminated if the function returns "false".
-     * If 'downwards' is true, first visit the current node,
-     * then visit the children.
-     */
     traverseTree(
       visit: (x: INStructChild) => NStructVisitorResult,
       downwards: boolean = true
