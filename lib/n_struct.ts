@@ -58,6 +58,7 @@ export interface INStructContainer<T extends INStructChild = INStructChild> exte
    */
   addChild(child: T): this
   addChildren(...list: T[]): this
+  computeNewChildIndex(i: number): number
   enumChildren(visit: NStructChildVisitor<T>): NStructVisitorResult
   findChild(predicate: (c: T) => boolean): T | null
   /**
@@ -249,6 +250,11 @@ export function NStructContainerMixin<
     addChildren(...list: T[]) {
       list.forEach(c => this.addChild(c))
       return this
+    }
+
+    computeNewChildIndex(i: number) {
+      const n = this.childCount
+      return Math.max(0, i >= 0 ? Math.min(i, n - 1) : n + i)
     }
 
     dispose() {

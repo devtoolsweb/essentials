@@ -50,6 +50,19 @@ function makeTree(
   return tree
 }
 
+test('computeNewChildIndex', () => {
+  const parent = new TestClass()
+  for (let i = 0; i < 100; i++) {
+    const cc = parent.childCount
+    const index = Math.trunc(2 * cc * Math.random()) - cc
+    const ci = parent.computeNewChildIndex(index)
+    const c = new TestClass()
+    parent.insertChild(c, index)
+    expect(c.childIndex).toBe(ci)
+  }
+})
+
+
 test('create', () => {
   const obj = new TestClass()
   expect(obj.childCount).toBe(0)
