@@ -110,6 +110,24 @@ test('find child', () => {
   ).not.toBeNull()
 })
 
+test('insert child', () => {
+  const parent = new TestClass()
+  const n = 100
+  for (let i = 0; i < n; i++) {
+    const index = Math.trunc(parent.childCount * Math.random())
+    const c = new TestClass()
+    parent.insertChild(c, index)
+    expect(c.childIndex).toBe(index)
+  }
+  for (let i = 0; i < n; i++) {
+    const cc = parent.childCount
+    const index = Math.trunc(cc * Math.random())
+    const c = new TestClass()
+    parent.insertChild(c, -(index + 1))
+    expect(c.childIndex).toBe(cc - index - 1)
+  }
+})
+
 test('iterate', () => {
   let n = 100
   const parent = makeTree(1, n)

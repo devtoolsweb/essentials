@@ -293,7 +293,7 @@ export function NStructContainerMixin<
       return null
     }
 
-    insertChild(child: T, index?: number) {
+    insertChild(child: T, index = Infinity) {
       let p = child.parent
       if (p) {
         if (p === this) {
@@ -311,11 +311,11 @@ export function NStructContainerMixin<
           p = p.parent
         }
       }
-      let xs = this.children || new Array<T>()
-      if (!this.children) {
-        ;(this as IParent<T>)[symChildren] = xs
+      let xs = this.children
+      if (!xs) {
+        xs = (this as IParent<T>)[symChildren] = new Array<T>()
       }
-      xs.push(child)
+      xs.splice(index, 0, child)
       ;(child as IChild)[symParent] = this
       child.updateParent()
       return this
