@@ -50,6 +50,19 @@ function makeTree(
   return tree
 }
 
+test('computeNewChildIndex', () => {
+  const parent = new TestClass()
+  for (let i = 0; i < 100; i++) {
+    const cc = parent.childCount
+    const index = Math.trunc(2 * cc * Math.random()) - cc
+    const ci = parent.computeNewChildIndex(index)
+    const c = new TestClass()
+    parent.insertChild(c, index)
+    expect(c.childIndex).toBe(ci)
+  }
+})
+
+
 test('create', () => {
   const obj = new TestClass()
   expect(obj.childCount).toBe(0)
@@ -108,6 +121,24 @@ test('find child', () => {
   expect(
     parent.findChild((x: INStructChild) => (x as TestClass).value === fc.value + n / 2)
   ).not.toBeNull()
+})
+
+test('insert child', () => {
+  const parent = new TestClass()
+  const n = 100
+  for (let i = 0; i < n; i++) {
+    const index = Math.trunc(parent.childCount * Math.random())
+    const c = new TestClass()
+    parent.insertChild(c, index)
+    expect(c.childIndex).toBe(index)
+  }
+  for (let i = 0; i < n; i++) {
+    const cc = parent.childCount
+    const index = Math.trunc(cc * Math.random())
+    const c = new TestClass()
+    parent.insertChild(c, -(index + 1))
+    expect(c.childIndex).toBe(cc - index - 1)
+  }
 })
 
 test('iterate', () => {
