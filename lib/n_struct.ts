@@ -413,6 +413,13 @@ export function NStructBaseContainerWrapper<
   return Base as any
 }
 
+export function NStructCoerceChildType<
+  TBase extends INStructContainerConstructor,
+  T extends INStructChild
+>(Base: TBase): TBase & INStructContainerConstructor<INStructContainer<T>> {
+  return Base as TBase & INStructContainerConstructor<INStructContainer<T>>
+}
+
 export const StandardNStructChild = (
   base: Constructor<IBaseClass>
 ): Constructor<IDisposable> & Constructor<INStructChild> & Constructor<IBaseClass> =>
