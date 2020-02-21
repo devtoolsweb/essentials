@@ -1,6 +1,5 @@
 import { BitFlagged, IBitFlags, IDisposable } from '@aperos/ts-goodies'
 
-const symName = Symbol('BaseClass.name')
 const classNameMap = new Map<Function, string>()
 
 export interface IBaseClass extends IDisposable {
@@ -53,9 +52,11 @@ export interface BaseClass {
 @BitFlagged
 @ClassName('BaseClass')
 export class BaseClass implements IBaseClass {
+  private $name!: string
+
   constructor(p?: IBaseClassOpts) {
     if (p) {
-      p.name && ((this as any)[symName] = p.name)
+      p.name && (this.$name = p.name)
     }
   }
 
@@ -72,14 +73,14 @@ export class BaseClass implements IBaseClass {
   }
 
   get name(): string {
-    return (this as any)[symName]
+    return this.$name
   }
 
   set name(value: string) {
     if (this.name) {
       throw new Error(`The name of descendand class of BaseClass cannot be changed`)
     }
-    ;(this as any)[symName] = value
+    this.$name = value
   }
 
   clone(): IBaseClass {
@@ -124,7 +125,7 @@ export class BaseClass implements IBaseClass {
   toJSON(): object {
     return {
       ctor: this.constructor.name,
-      ...(symName in this ? { name: this.name } : {})
+      ...(this.name ? { name: this.name } : {})
     }
   }
 

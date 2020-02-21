@@ -29,29 +29,6 @@ export interface IItemContainer<T extends IItem = IItem> extends IBaseItemContai
   unselectItem(item: T): this
 }
 
-const symInProcessItems = Symbol('ItemContainer.inProcessItems')
-const symSelectedItems = Symbol('ItemContainer.selectedItems')
-
-const createSelectedItems = (c: IItemContainer): Set<IItem> => {
-  let si = (c as any)[symSelectedItems]
-  if (!si) {
-    si = (c as any)[symSelectedItems] = new Set<IItem>()
-  }
-  return si
-}
-
-const handleItem = (c: IItemContainer, item: IItem, body: () => void) => {
-  let inProcessItems: Set<IItem> = (c as any)[symInProcessItems]
-  if (!inProcessItems) {
-    inProcessItems = (c as any)[symInProcessItems] = new Set<IItem>()
-  }
-  if (!inProcessItems.has(item)) {
-    inProcessItems.add(item)
-    body()
-    inProcessItems.delete(item)
-  }
-}
-
 const emptyItems = Object.freeze(new Set<IItem>())
 
 export interface IItemContainerConstructor<T extends IItem = IItem>
@@ -62,6 +39,9 @@ export function ItemContainerMixin<
   TBase extends IConstructor<INStructContainer<T>>
 >(Base: TBase): TBase & IItemContainerConstructor<T> {
   return class MixedItemContainer extends Base implements IItemContainer<T> {
+    private $inProcessItems!: Set<T>
+    private $selectedItems!: Set<T>
+
     readonly flags!: IBitFlags<ItemContainerFlags>
 
     /**
@@ -98,7 +78,7 @@ export function ItemContainerMixin<
     }
 
     get selectedItems(): Set<T> {
-      return (this as any)[symSelectedItems] || emptyItems
+      return this.$selectedItems || emptyItems
     }
 
     /**
@@ -216,14 +196,14 @@ export function ItemContainerMixin<
     }
 
     selectItem(item: T): this {
-      handleItem(this, item, () => {
+      this.handleItem(item, () => {
         if (item.parent !== this) {
           throw new Error('Item is not in the container')
         }
         if (!this.allowMultiselect) {
           this.unselectAll()
         }
-        const si = createSelectedItems(this)
+        const si = this.createSelectedItems()
         if (!si.has(item)) {
           si.add(item)
           item.updateSelection(true)
@@ -265,7 +245,7 @@ export function ItemContainerMixin<
     }
 
     unselectItem(item: T): this {
-      handleItem(this, item, () => {
+      this.handleItem(item, () => {
         const si = this.selectedItems
         if (!si.has(item)) {
           throw new Error('Item is not in the container')
@@ -274,6 +254,26 @@ export function ItemContainerMixin<
         item.updateSelection(false)
       })
       return this
+    }
+
+    private createSelectedItems() {
+      let si = this.$selectedItems
+      if (!si) {
+        si = this.$selectedItems = new Set<T>()
+      }
+      return si
+    }
+
+    private handleItem(item: IItem, body: () => void) {
+      let inProcessItems: Set<IItem> = this.$inProcessItems
+      if (!inProcessItems) {
+        inProcessItems = this.$inProcessItems = new Set<T>()
+      }
+      if (!inProcessItems.has(item)) {
+        inProcessItems.add(item)
+        body()
+        inProcessItems.delete(item)
+      }
     }
   }
 }

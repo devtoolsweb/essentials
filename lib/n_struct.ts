@@ -104,17 +104,12 @@ export interface INStructContainerConstructor<T extends INStructContainer = INSt
   new (...args: any[]): T
 }
 
-const symChildren = Symbol('NStruct.children')
 const symParent = Symbol('NStruct.parent')
 const symMarkForDeletion = Symbol('NStruct.markForDeletion')
 
 interface IChild extends INStructChild {
   [symParent]?: INStructContainer
   [symMarkForDeletion]?: boolean
-}
-
-interface IParent<T extends INStructChild> extends INStructContainer<T> {
-  [symChildren]?: Array<T>
 }
 
 export function isNStructContainer(c?: INStructChild | null): c is INStructContainer {
@@ -191,9 +186,11 @@ export function NStructContainerMixin<
 >(
   Base: TBase
 ): TBase & INStructContainerConstructor<INStructContainer<T>> & INStructChildConstructor {
-  return class MixedNStructContainer extends Base implements INStructContainer<T>, IParent<T> {
+  return class MixedNStructContainer extends Base implements INStructContainer<T> {
+    private $children!: Array<T>
+
     get children(): Array<T> | null {
-      return (this as IParent<T>)[symChildren] || null
+      return this.$children || null
     }
 
     get childCount() {
@@ -319,7 +316,7 @@ export function NStructContainerMixin<
       }
       let xs = this.children
       if (!xs) {
-        xs = (this as IParent<T>)[symChildren] = new Array<T>()
+        xs = this.$children = new Array<T>()
       }
       xs.splice(index, 0, child)
       ;(child as IChild)[symParent] = this
@@ -354,7 +351,7 @@ export function NStructContainerMixin<
       const xs = this.children!
       xs.some((x, i) => x === child && xs.splice(i, 1))
       if (xs.length < 1) {
-        delete (this as IParent<T>)[symChildren]
+        delete this.$children
       }
       delete (child as IChild)[symParent]
       child.updateParent()
@@ -368,7 +365,7 @@ export function NStructContainerMixin<
           delete (x as IChild)[symParent]
           x.updateParent()
         }
-        delete (this as IParent<T>)[symChildren]
+        delete this.$children
       }
       return this
     }
