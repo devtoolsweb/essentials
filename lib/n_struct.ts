@@ -47,6 +47,7 @@ export interface INStructContainer<T extends INStructChild = INStructChild> exte
    * or null if the collection is empty.
    */
   readonly firstChild: T | null
+  readonly lastChild: T | null
   readonly hasChildren: boolean
   readonly isLeaf: boolean
   readonly isRoot: boolean
@@ -92,6 +93,12 @@ export interface INStructContainer<T extends INStructChild = INStructChild> exte
     visit: (x: INStructChild) => NStructVisitorResult,
     downwards?: boolean
   ): NStructVisitorResult
+  /**
+   * Truncates all end elements starting with the specified index.
+   * If index is negative, it will begin that many elements from the end
+   * of the array  (as it is done in Array.splice() method).
+   */
+  truncate(lastChildIndex: number): this
 }
 
 export interface INStructChildOpts extends IBaseClassOpts {}
@@ -215,6 +222,11 @@ export function NStructContainerMixin<
 
     get isRoot() {
       return !!this.parent === false
+    }
+
+    get lastChild() {
+      const xs = this.children
+      return xs ? xs[xs.length - 1] : null
     }
 
     /*
@@ -394,6 +406,15 @@ export function NStructContainerMixin<
         result = visit(this)
       }
       return result
+    }
+
+    truncate(last: number): this {
+      const n = this.childCount
+      const index = last < 0 ? Math.max(0, n + last) : last
+      while (this.childCount > index) {
+        this.removeChild(this.lastChild!)
+      }
+      return this
     }
   }
 }

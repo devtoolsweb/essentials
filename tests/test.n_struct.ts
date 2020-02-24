@@ -31,12 +31,20 @@ class TestClass extends NStructContainerMixin(StandardNStructChild(BaseClass))
   }
 }
 
-function makeTree(
+const makeList = (n = 10) => {
+  const list = new TestClass()
+  for (let i = 0; i < n; i++) {
+    list.addChild(new TestClass())
+  }
+  return list
+}
+
+const makeTree = (
   depth = 0,
   minNodes = 3,
   parent: INStructContainer | null = null,
   maxNodes = 9
-): TestClass {
+) => {
   const tree = new TestClass()
   if (parent) {
     parent.addChild(tree)
@@ -61,7 +69,6 @@ test('computeNewChildIndex', () => {
     expect(c.childIndex).toBe(ci)
   }
 })
-
 
 test('create', () => {
   const obj = new TestClass()
@@ -202,4 +209,26 @@ test('traverse tree', () => {
     return null
   })
   expect(d).toBe(n)
+})
+
+test('truncate', () => {
+  let list = makeList(10)
+  list.truncate(0)
+  expect(list.childCount).toBe(0)
+
+  list = makeList(10)
+  list.truncate(10)
+  expect(list.childCount).toBe(10)
+
+  list = makeList(10)
+  list.truncate(5)
+  expect(list.childCount).toBe(5)
+
+  list = makeList(10)
+  list.truncate(-3)
+  expect(list.childCount).toBe(7)
+
+  list = makeList(10)
+  list.truncate(-10)
+  expect(list.childCount).toBe(0)
 })
