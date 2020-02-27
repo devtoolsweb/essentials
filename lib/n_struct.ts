@@ -2,7 +2,7 @@
  * NStruct implements nested hierarchy of objects.
  * TODO: use undefined instead of null
  */
-import { Constructor, IDisposable } from '@aperos/ts-goodies'
+import { Constructor, IDisposable, IConstructor } from '@aperos/ts-goodies'
 import { IBaseClassOpts, IBaseClass } from './base_class'
 
 export interface INStructChild extends IDisposable {
@@ -103,13 +103,11 @@ export interface INStructContainer<T extends INStructChild = INStructChild> exte
 
 export interface INStructChildOpts extends IBaseClassOpts {}
 
-export interface INStructChildConstructor<T extends INStructChild = INStructChild> {
-  new (...args: any[]): T
-}
+export interface INStructChildConstructor<T extends INStructChild = INStructChild>
+  extends IConstructor<T> {}
 
-export interface INStructContainerConstructor<T extends INStructContainer = INStructContainer> {
-  new (...args: any[]): T
-}
+export interface INStructContainerConstructor<T extends INStructContainer = INStructContainer>
+  extends IConstructor<T> {}
 
 const symParent = Symbol('NStruct.parent')
 const symMarkForDeletion = Symbol('NStruct.markForDeletion')

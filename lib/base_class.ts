@@ -1,4 +1,4 @@
-import { BitFlagged, IBitFlags, IDisposable } from '@aperos/ts-goodies'
+import { BitFlagged, IBitFlags, IDisposable, IConstructor } from '@aperos/ts-goodies'
 
 const classNameMap = new Map<Function, string>()
 
@@ -18,9 +18,7 @@ export interface IBaseClassOpts {
   readonly name?: string
 }
 
-export interface IBaseClassConstructor {
-  new (...args: any[]): IBaseClass
-}
+export interface IBaseClassConstructor extends IConstructor<IBaseClass> {}
 
 export type BaseClassConstructor = new (p?: IBaseClassOpts) => IBaseClass
 
