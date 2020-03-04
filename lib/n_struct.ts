@@ -98,7 +98,7 @@ export interface INStructContainer<T extends INStructChild = INStructChild> exte
    * If index is negative, it will begin that many elements from the end
    * of the array  (as it is done in Array.splice() method).
    */
-  truncate(lastChildIndex: number): this
+  truncate(lastChildIndex?: number): this
 }
 
 export interface INStructChildOpts extends IBaseClassOpts {}
@@ -369,15 +369,7 @@ export function NStructContainerMixin<
     }
 
     removeChildren() {
-      const xs = this.children
-      if (xs) {
-        for (const x of xs) {
-          delete (x as IChild)[symParent]
-          x.updateParent()
-        }
-        delete this.$children
-      }
-      return this
+      return this.truncate()
     }
 
     traverseTree(
@@ -406,7 +398,7 @@ export function NStructContainerMixin<
       return result
     }
 
-    truncate(last: number): this {
+    truncate(last = 0): this {
       const n = this.childCount
       const index = last < 0 ? Math.max(0, n + last) : last
       while (this.childCount > index) {
