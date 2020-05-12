@@ -9,8 +9,9 @@
     "@types/jest": "latest",
     "jest": "latest",
     "rollup": "<=2.8.2",
+    "rollup-plugin-dts": "latest",
     "rollup-plugin-terser": "latest",
-    "rollup-plugin-ts": "latest",
+    "rollup-plugin-typescript2": "latest",
     "ts-jest": "latest",
     "ts-node": "latest",
     "typescript": "latest"
