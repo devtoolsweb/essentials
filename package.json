@@ -8,10 +8,9 @@
   "devDependencies": {
     "@types/jest": "latest",
     "jest": "latest",
-    "rollup": "latest",
-    "rollup-plugin-dts": "latest",
+    "rollup": "<=2.8.2",
     "rollup-plugin-terser": "latest",
-    "rollup-plugin-typescript2": "latest",
+    "rollup-plugin-ts": "latest",
     "ts-jest": "latest",
     "ts-node": "latest",
     "typescript": "latest"

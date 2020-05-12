@@ -1,20 +1,15 @@
 import path from 'path'
-import pluginTypescript from 'rollup-plugin-typescript2'
-import pluginDts from 'rollup-plugin-dts'
+import pluginTypescript from 'rollup-plugin-ts'
 import { terser as pluginTerser } from 'rollup-plugin-terser'
 import pkg from './package.json'
 
-const external = [
-  ...Object.keys(process.binding('natives')),
-  ...Object.keys(pkg.dependencies || {})
-]
+const external = Object.keys(pkg.dependencies || {})
 
 const targetDir = 'dist'
 
 const plugins = [
   pluginTypescript({
-    useTsconfigDeclarationDir: true,
-    verbosity: 1
+    tsconfig: conf => ({ ...conf, declarationDir: 'dist' })
   })
 ]
 
@@ -33,15 +28,10 @@ export default [
     external,
     output: {
       file: path.join(targetDir, 'index.js'),
-      format: 'cjs',
+      format: 'es',
       name: 'index',
       sourcemap: true
     },
     plugins
-  },
-  {
-    input: './build/lib/index.d.ts',
-    output: [{ file: path.join(targetDir, 'index.d.ts'), format: 'es' }],
-    plugins: [pluginDts({ verbose: true })]
   }
 ]
