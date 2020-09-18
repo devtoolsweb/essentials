@@ -1,4 +1,4 @@
-# Aperos essentials
+# @aperos/essentials
 
 The most essential TypeScript classes for the Aperos framework.
 
