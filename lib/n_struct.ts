@@ -192,7 +192,7 @@ export function NStructContainerMixin<
   Base: TBase
 ): TBase & INStructContainerConstructor<INStructContainer<T>> & INStructChildConstructor {
   return class MixedNStructContainer extends Base implements INStructContainer<T> {
-    private $children!: Array<T>
+    private $children?: Array<T>
 
     get children(): Array<T> | null {
       return this.$children || null
