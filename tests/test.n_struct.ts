@@ -1,4 +1,4 @@
-import { IBitFlags } from '@aperos/ts-goodies'
+import { IBitFlags } from '@devtoolsweb/ts-goodies'
 import {
   BaseClass,
   BaseClassFlags,

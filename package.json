@@ -1,10 +1,10 @@
 {
-  "author": "<aperos.dev@gmail.com>",
+  "author": "<devtoolsweb.dev@gmail.com>",
   "dependencies": {
-    "@aperos/event-emitter": "*",
-    "@aperos/ts-goodies": "*"
+    "@devtoolsweb/event-emitter": "*",
+    "@devtoolsweb/ts-goodies": "*"
   },
-  "description": "The most essential TypeScript types for the Aperos framework",
+  "description": "The most essential TypeScript types for the Devtoolsweb framework",
   "devDependencies": {
     "@types/jest": "latest",
     "jest": "latest",
@@ -17,7 +17,7 @@
     "typescript": "latest"
   },
   "license": "MIT",
-  "name": "@aperos/essentials",
+  "name": "@devtoolsweb/essentials",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "scripts": {

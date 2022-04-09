@@ -1,4 +1,4 @@
-import { BitFlagged, IBitFlags, IDisposable, IConstructor } from '@aperos/ts-goodies'
+import { BitFlagged, IBitFlags, IDisposable, IConstructor } from '@devtoolsweb/ts-goodies'
 
 const classNameMap = new Map<Function, string>()
 

@@ -2,7 +2,7 @@
  * NStruct implements nested hierarchy of objects.
  * TODO: use undefined instead of null
  */
-import { Constructor, IDisposable, IConstructor } from '@aperos/ts-goodies'
+import { Constructor, IDisposable, IConstructor } from '@devtoolsweb/ts-goodies'
 import { IBaseClassOpts, IBaseClass } from './base_class'
 
 export interface INStructChild extends IDisposable {

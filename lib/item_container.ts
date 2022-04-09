@@ -3,7 +3,7 @@
  * after NStructContainerMixin in the list of mixins, so that some
  * methods of the NStructContainerMixin can be overridden.
  */
-import { IBitFlags, IConstructor } from '@aperos/ts-goodies'
+import { IBitFlags, IConstructor } from '@devtoolsweb/ts-goodies'
 import { INStructChild, INStructContainerConstructor, INStructContainer } from './n_struct'
 import { BaseClassFlags } from './base_class'
 import { IBaseItemContainer, IItem } from './item'
