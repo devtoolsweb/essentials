@@ -1,3 +1,3 @@
 export interface IReusable {
-  reset(): this
+    reset(): this
 }
