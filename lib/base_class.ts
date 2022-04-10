@@ -52,7 +52,7 @@ export class BaseClass implements IBaseClass {
 
     private $name!: string
 
-    constructor (p: IBaseClassOpts) {
+    constructor (p?: IBaseClassOpts) {
         if (p) {
             p.name && (this.$name = p.name)
         }

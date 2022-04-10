@@ -4,7 +4,7 @@
     "@devtoolsweb/event-emitter": "*",
     "@devtoolsweb/ts-goodies": "*"
   },
-  "description": "The most essential TypeScript types for the Devtoolsweb framework",
+  "description": "Additional essential classes for DevToolsWeb",
   "devDependencies": {
     "@types/jest": "latest",
     "jest": "latest",
